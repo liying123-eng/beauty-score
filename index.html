@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI颜值测评</title>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 16px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .password-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .password-container h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .password-container p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .password-input {
+            padding: 15px 20px;
+            font-size: 18px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            width: 250px;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+
+        .password-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .password-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .password-error {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .usage-info {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+            display: none;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 72px;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .score-label {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .result-desc {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .retry-btn {
+            background: #28a745;
+            margin-top: 20px;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 AI颜值测评</h1>
+        <p class="subtitle">专业AI分析，客观评测颜值分数</p>
+
+        <input type="file" id="fileInput" accept="image/*">
+
+        <div class="password-container" id="passwordContainer">
+            <h2>🔐 请输入访问密码</h2>
+            <p>购买后获取密码，每人可测试 2 次<br>分享好友需单独购买</p>
+            <input type="password" class="password-input" id="passwordInput" placeholder="输入密码" maxlength="10">
+            <br>
+            <button class="password-btn" onclick="verifyPassword()">进入测试</button>
+            <div class="password-error" id="passwordError">密码错误，请重新输入</div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="usage-info" id="usageInfo">剩余测试次数：2</div>
+
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2" style="margin-bottom: 15px;">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <div class="upload-text">
+                    点击或拖拽上传照片<br>
+                    <small>支持 JPG、PNG 格式</small>
+                </div>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+                <img id="previewImage" src="" alt="预览">
+            </div>
+
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <button class="btn" id="analyzeBtn" onclick="analyzeImage()">开始评测</button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI正在分析中...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="result" id="result">
+                <div class="score-circle" id="scoreCircle">
+                    <div id="scoreNumber">8.5</div>
+                    <div class="score-label">颜值分</div>
+                </div>
+                <div class="result-desc" id="resultDesc"></div>
+                <button class="btn retry-btn" onclick="reset()" style="display: inline-block;">再测一次</button>
+                
+                <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
+                    <h3 style="margin-bottom: 15px;">🎁 福利活动</h3>
+                    <p style="font-size: 14px; line-height: 1.8; margin-bottom: 15px;">
+                        1. 店铺复购仅需 <strong style="font-size: 18px;">1.5元</strong><br>
+                        2. 好评晒图可额外获得 <strong style="font-size: 18px;">2次</strong> 测试机会
+                    </p>
+                    <p style="font-size: 12px; opacity: 0.9;">联系客服领取奖励</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = 'BEAUTY2024';
+        const MAX_USAGE = 2;
+
+        let currentImage = null;
+        let modelsLoaded = false;
+
+        // 评分标准（已上浮1分）
+        const scoreDescriptions = {
+            10: { label: "惊为天人", desc: "您的颜值已经达到了顶级明星水准！五官精致立体，气质出众，走到哪里都是焦点。建议：保持自信，您的美貌是上天的恩赐！", color: "#FF1744" },
+            9: { label: "超高颜值", desc: "您拥有令人惊艳的美貌！五官比例接近完美，气质优雅迷人。建议：可以尝试时尚、艺术等领域，您的外形条件非常出众！", color: "#F50057" },
+            8: { label: "高颜值", desc: "您的外貌非常出色！五官协调，气质佳，属于人群中的佼佼者。建议：保持良好的生活习惯，适当护肤会让您更加光彩照人！", color: "#E91E63" },
+            7: { label: "漂亮/帅气", desc: "您的颜值在中上水平，五官端正，很有魅力。建议：通过合适的穿搭和发型，能进一步提升您的气质！", color: "#9C27B0" },
+            6: { label: "清秀/耐看", desc: "您拥有清秀耐看的面容，气质温和。建议：保持微笑，自信的笑容能大大提升您的魅力值！", color: "#673AB7" },
+            5: { label: "普通偏上", desc: "您的外貌属于大众审美范围，有自己的特点。建议：找到适合自己的风格，每个人都有独特的美！", color: "#3F51B5" },
+            4: { label: "普通", desc: "您有着朴实的外表，亲和力强。建议：注重仪态和穿搭，内在修养同样重要，自信的人最有魅力！", color: "#2196F3" },
+            3: { label: "有特色", desc: "您的外貌有自己的特点，辨识度高。建议：找到适合自己的风格，扬长避短，展现独特魅力！", color: "#03A9F4" },
+            2: { label: "潜力股", desc: "您有着可塑性强的外貌。建议：通过改变发型、穿搭、妆容等，可以大幅提升颜值，不要放弃自己！", color: "#00BCD4" },
+            1: { label: "独特魅力", desc: "每个人都有独特的美！建议：注重内在修养，培养气质，自信乐观的心态是最好的化妆品！", color: "#009688" }
+        };
+
+        function checkAuth() {
+            const isVerified = localStorage.getItem('beauty_score_verified');
+            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
+            
+            if (isVerified === 'true' && usageCount < MAX_USAGE) {
+                showMainContent();
+                updateUsageDisplay();
+            } else if (isVerified === 'true' && usageCount >= MAX_USAGE) {
+                localStorage.removeItem('beauty_score_verified');
+                localStorage.removeItem('beauty_score_usage');
+                showPasswordScreen();
+            } else {
+                showPasswordScreen();
+            }
+        }
+
+        function showPasswordScreen() {
+            document.getElementById('passwordContainer').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+        }
+
+        function showMainContent() {
+            document.getElementById('passwordContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        function verifyPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorDiv = document.getElementById('passwordError');
+            
+            if (input === CORRECT_PASSWORD) {
+                localStorage.setItem('beauty_score_verified', 'true');
+                localStorage.setItem('beauty_score_usage', '0');
+                errorDiv.style.display = 'none';
+                showMainContent();
+                updateUsageDisplay();
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function updateUsageDisplay() {
+            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
+            const remaining = MAX_USAGE - usageCount;
+            document.getElementById('usageInfo').textContent = `剩余测试次数：${remaining}`;
+        }
+
+        function incrementUsage() {
+            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
+            const newCount = usageCount + 1;
+            localStorage.setItem('beauty_score_usage', newCount.toString());
+            updateUsageDisplay();
+            
+            if (newCount >= MAX_USAGE) {
+                setTimeout(() => {
+                    alert('测试次数已用完，如需继续测试请重新购买获取新密码');
+                }, 500);
+            }
+        }
+
+        checkAuth();
+
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    document.getElementById('previewImage').src = currentImage;
+                    document.getElementById('previewContainer').style.display = 'block';
+                    document.getElementById('analyzeBtn').style.display = 'inline-block';
+                    document.getElementById('result').style.display = 'none';
+                    document.getElementById('error').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        const uploadArea = document.querySelector('.upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#e9ecef';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#f8f9fa';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9fa';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    document.getElementById('previewImage').src = currentImage;
+                    document.getElementById('previewContainer').style.display = 'block';
+                    document.getElementById('analyzeBtn').style.display = 'inline-block';
+                    document.getElementById('result').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function loadModels() {
+            if (modelsLoaded) return;
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+
+            try {
+                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+                
+                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+                progressFill.style.width = '33%';
+                
+                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                progressFill.style.width = '66%';
+                
+                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                progressFill.style.width = '100%';
+                
+                modelsLoaded = true;
+                setTimeout(() => {
+                    progressBar.style.display = 'none';
+                }, 500);
+            } catch (error) {
+                console.error('模型加载失败:', error);
+                modelsLoaded = true;
+                progressBar.style.display = 'none';
+            }
+        }
+
+        // 计算颜值分数（核心算法，已上浮1分）
+        function calculateBeautyScore(detection) {
+            const landmarks = detection.landmarks;
+            const positions = landmarks.positions;
+
+            // 基础分（已上浮）
+            let baseScore = 4.5;
+
+            // 计算面部对称性
+            const leftEye = positions[36];
+            const rightEye = positions[45];
+            const noseTip = positions[33];
+            const chin = positions[8];
+            
+            // 眼距比例（理想比例约为脸宽的1/3）
+            const faceWidth = Math.abs(positions[16].x - positions[0].x);
+            const eyeDistance = Math.abs(positions[39].x - positions[42].x);
+            const eyeRatio = eyeDistance / faceWidth;
+            
+            // 眼距评分（0.3-0.4为理想范围）
+            if (eyeRatio >= 0.3 && eyeRatio <= 0.4) {
+                baseScore += 1.5;
+            } else if (eyeRatio >= 0.25 && eyeRatio <= 0.45) {
+                baseScore += 0.8;
+            } else {
+                baseScore += 0.3;
+            }
+
+            // 眼睛大小
+            const leftEyeHeight = Math.abs(positions[41].y - positions[37].y);
+            const rightEyeHeight = Math.abs(positions[47].y - positions[43].y);
+            const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
+            const eyeSizeRatio = avgEyeHeight / faceWidth;
+            
+            if (eyeSizeRatio > 0.08) {
+                baseScore += 1.2;
+            } else if (eyeSizeRatio > 0.06) {
+                baseScore += 0.8;
+            } else {
+                baseScore += 0.4;
+            }
+
+            // 鼻子比例
+            const noseLength = Math.abs(positions[33].y - positions[27].y);
+            const faceHeight = Math.abs(positions[8].y - positions[27].y);
+            const noseRatio = noseLength / faceHeight;
+            
+            if (noseRatio >= 0.3 && noseRatio <= 0.4) {
+                baseScore += 1.0;
+            } else if (noseRatio >= 0.25 && noseRatio <= 0.45) {
+                baseScore += 0.6;
+            } else {
+                baseScore += 0.3;
+            }
+
+            // 嘴巴比例
+            const mouthWidth = Math.abs(positions[54].x - positions[48].x);
+            const mouthRatio = mouthWidth / faceWidth;
+            
+            if (mouthRatio >= 0.35 && mouthRatio <= 0.5) {
+                baseScore += 0.8;
+            } else {
+                baseScore += 0.4;
+            }
+
+            // 脸型比例（黄金比例约为1.618）
+            const faceRatio = faceWidth / faceHeight;
+            if (faceRatio >= 0.7 && faceRatio <= 0.85) {
+                baseScore += 1.0;
+            } else if (faceRatio >= 0.65 && faceRatio <= 0.9) {
+                baseScore += 0.5;
+            }
+
+            // 添加随机波动（-0.3到+0.3）
+            baseScore += (Math.random() * 0.6 - 0.3);
+
+            // 确保在1-10范围内
+            return Math.max(1, Math.min(10, baseScore));
+        }
+
+        async function analyzeImage() {
+            if (!currentImage) return;
+
+            document.getElementById('analyzeBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+
+            try {
+                if (!modelsLoaded) {
+                    await loadModels();
+                }
+
+                const img = new Image();
+                img.src = currentImage;
+                await new Promise((resolve) => { img.onload = resolve; });
+
+                const detection = await faceapi
+                    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+                    .withFaceLandmarks();
+
+                if (!detection) {
+                    throw new Error('未检测到人脸，请上传清晰的正面照片');
+                }
+
+                // 计算颜值分数
+                const score = calculateBeautyScore(detection);
+                const roundedScore = Math.round(score * 10) / 10;
+
+                // 显示结果
+                showResult(roundedScore);
+
+                // 增加使用次数
+                incrementUsage();
+
+            } catch (error) {
+                document.getElementById('error').textContent = error.message || '分析失败，请重试';
+                document.getElementById('error').style.display = 'block';
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = false;
+        }
+
+        function showResult(score) {
+            const scoreInt = Math.floor(score);
+            const desc = scoreDescriptions[scoreInt] || scoreDescriptions[5];
+            
+            document.getElementById('scoreNumber').textContent = score.toFixed(1);
+            document.getElementById('scoreCircle').style.background = `linear-gradient(135deg, ${desc.color} 0%, #764ba2 100%)`;
+            document.getElementById('resultDesc').innerHTML = `
+                <strong style="color: ${desc.color}; font-size: 20px;">${desc.label}</strong><br><br>
+                ${desc.desc}
+            `;
+            
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('analyzeBtn').style.display = 'none';
+            document.querySelector('.upload-area').style.display = 'none';
+        }
+
+        function reset() {
+            currentImage = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('previewImage').src = '';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('analyzeBtn').style.display = 'none';
+            document.querySelector('.upload-area').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
