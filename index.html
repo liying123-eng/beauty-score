@@ -3,646 +3,668 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI颜值测评</title>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <title>AI颜值测评 - 专业脸型五官分析</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
-
+        
         .container {
+            max-width: 800px;
+            margin: 0 auto;
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         }
-
-        h1 {
+        
+        .header {
             text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
             color: #333;
             margin-bottom: 10px;
-            font-size: 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: #f8f9fa;
-        }
-
-        .upload-area:hover {
-            background: #e9ecef;
-            border-color: #764ba2;
-        }
-
-        .upload-text {
+        
+        .header p {
             color: #666;
             font-size: 16px;
         }
-
+        
+        .upload-section {
+            border: 3px dashed #ddd;
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 14px;
+            color: #999;
+        }
+        
         #fileInput {
             display: none;
         }
-
-        .password-container {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .password-container h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .password-container p {
-            color: #666;
+        
+        .preview-section {
+            display: none;
             margin-bottom: 30px;
-            font-size: 14px;
         }
-
-        .password-input {
-            padding: 15px 20px;
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 30px;
             font-size: 18px;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            width: 250px;
-            text-align: center;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-        }
-
-        .password-input:focus {
-            outline: none;
-            border-color: #764ba2;
-        }
-
-        .password-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
         }
-
-        .password-btn:hover {
-            transform: scale(1.05);
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
-
-        .password-error {
-            color: #e74c3c;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .usage-info {
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 20px;
-            color: #667eea;
-            font-size: 14px;
-        }
-
-        .main-content {
-            display: none;
-        }
-
-        .preview-container {
-            display: none;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .preview-container img {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s;
-            display: none;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-        }
-
-        .btn:disabled {
+        
+        .analyze-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            transform: none;
         }
-
+        
         .loading {
             display: none;
             text-align: center;
-            margin-top: 20px;
+            padding: 40px;
         }
-
+        
+        .loading.active {
+            display: block;
+        }
+        
         .spinner {
+            width: 60px;
+            height: 60px;
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
         }
-
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .result {
+        
+        .result-section {
             display: none;
-            margin-top: 30px;
-            text-align: center;
-            animation: fadeIn 0.5s;
         }
-
+        
+        .result-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .score-circle {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 72px;
-            font-weight: bold;
-            color: white;
-            position: relative;
+        
+        .score-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
         }
-
+        
         .score-label {
             font-size: 18px;
-            margin-top: 10px;
+            margin-bottom: 10px;
+            opacity: 0.9;
         }
-
-        .result-desc {
-            color: #666;
-            font-size: 16px;
+        
+        .score-value {
+            font-size: 72px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .score-desc {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .analysis-card {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 25px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .analysis-card h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analysis-card .icon {
+            font-size: 24px;
+        }
+        
+        .analysis-content {
+            color: #555;
             line-height: 1.8;
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+            font-size: 15px;
         }
-
-        .retry-btn {
-            background: #28a745;
-            margin-top: 20px;
+        
+        .face-type {
+            background: #fff3e0;
+            border-left-color: #ff9800;
         }
-
-        .error {
-            color: #dc3545;
-            margin-top: 10px;
-            display: none;
+        
+        .face-type h3 {
+            color: #e65100;
         }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: #f0f0f0;
-            border-radius: 3px;
+        
+        .features {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+        
+        .features h3 {
+            color: #2e7d32;
+        }
+        
+        .suggestions {
+            background: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        
+        .suggestions h3 {
+            color: #1565c0;
+        }
+        
+        .detail-section {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-section h4 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-name {
+            color: #555;
+            font-size: 15px;
+        }
+        
+        .feature-score {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .score-bar {
+            width: 100px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
             overflow: hidden;
-            margin-top: 20px;
-            display: none;
         }
-
-        .progress-fill {
+        
+        .score-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .score-number {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+            text-align: right;
+        }
+        
+        .recommendation {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .recommendation h4 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .recommendation ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .recommendation li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .recommendation li::before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+        
+        .restart-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 16px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto 0;
+        }
+        
+        .restart-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .score-value {
+                font-size: 56px;
+            }
+            
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌟 AI颜值测评</h1>
-        <p class="subtitle">专业AI分析，客观评测颜值分数</p>
-
-        <input type="file" id="fileInput" accept="image/*">
-
-        <div class="password-container" id="passwordContainer">
-            <h2>🔐 请输入访问密码</h2>
-            <p>购买后获取密码，每人可测试 2 次<br>分享好友需单独购买</p>
-            <input type="password" class="password-input" id="passwordInput" placeholder="输入密码" maxlength="10">
-            <br>
-            <button class="password-btn" onclick="verifyPassword()">进入测试</button>
-            <div class="password-error" id="passwordError">密码错误，请重新输入</div>
+        <div class="header">
+            <h1>🌸 AI颜值测评</h1>
+            <p>专业脸型分析 + 五官特征评估 + 个性化变美建议</p>
         </div>
-
-        <div class="main-content" id="mainContent">
-            <div class="usage-info" id="usageInfo">剩余测试次数：2</div>
-
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2" style="margin-bottom: 15px;">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <div class="upload-text">
-                    点击或拖拽上传照片<br>
-                    <small>支持 JPG、PNG 格式</small>
+        
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">点击或拖拽上传照片</div>
+            <div class="upload-hint">支持 JPG、PNG 格式，建议上传清晰的正面照</div>
+        </div>
+        
+        <input type="file" id="fileInput" accept="image/*">
+        
+        <div class="preview-section" id="previewSection">
+            <img class="preview-image" id="previewImage" alt="预览">
+            <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
+                🔍 开始智能分析
+            </button>
+        </div>
+        
+        <div class="loading" id="loadingSection">
+            <div class="spinner"></div>
+            <p>AI正在分析您的五官特征...</p>
+            <p style="font-size: 14px; color: #999; margin-top: 10px;">正在评估脸型、三庭五眼、五官比例</p>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <div class="score-card">
+                <div class="score-label">综合颜值评分</div>
+                <div class="score-value" id="totalScore">--</div>
+                <div class="score-desc" id="scoreDesc">--</div>
+            </div>
+            
+            <div class="analysis-grid">
+                <div class="analysis-card face-type">
+                    <h3><span class="icon">👤</span> 脸型分析</h3>
+                    <div class="analysis-content" id="faceTypeResult">
+                        分析中...
+                    </div>
                 </div>
-            </div>
-
-            <div class="preview-container" id="previewContainer">
-                <img id="previewImage" src="" alt="预览">
-            </div>
-
-            <div class="progress-bar" id="progressBar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-
-            <button class="btn" id="analyzeBtn" onclick="analyzeImage()">开始评测</button>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>AI正在分析中...</p>
-            </div>
-
-            <div class="error" id="error"></div>
-
-            <div class="result" id="result">
-                <div class="score-circle" id="scoreCircle">
-                    <div id="scoreNumber">8.5</div>
-                    <div class="score-label">颜值分</div>
-                </div>
-                <div class="result-desc" id="resultDesc"></div>
-                <button class="btn retry-btn" onclick="reset()" style="display: inline-block;">再测一次</button>
                 
-                <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
-                    <h3 style="margin-bottom: 15px;">🎁 福利活动</h3>
-                    <p style="font-size: 14px; line-height: 1.8; margin-bottom: 15px;">
-                        1. 店铺复购仅需 <strong style="font-size: 18px;">1.5元</strong><br>
-                        2. 好评晒图可额外获得 <strong style="font-size: 18px;">2次</strong> 测试机会
-                    </p>
-                    <p style="font-size: 12px; opacity: 0.9;">联系客服领取奖励</p>
+                <div class="analysis-card features">
+                    <h3><span class="icon">✨</span> 五官特征</h3>
+                    <div class="analysis-content" id="featuresResult">
+                        分析中...
+                    </div>
+                </div>
+                
+                <div class="analysis-card suggestions">
+                    <h3><span class="icon">💡</span> 变美建议</h3>
+                    <div class="analysis-content" id="suggestionsResult">
+                        生成中...
+                    </div>
                 </div>
             </div>
+            
+            <div class="detail-section">
+                <h4>📊 五官详细评分</h4>
+                <div id="detailScores"></div>
+            </div>
+            
+            <div class="recommendation">
+                <h4>🎯 专属变美方案</h4>
+                <ul id="recommendationList"></ul>
+            </div>
+            
+            <button class="restart-btn" onclick="restart()">重新测试</button>
         </div>
     </div>
 
     <script>
-        const CORRECT_PASSWORD = 'BEAUTY2024';
-        const MAX_USAGE = 2;
-
-        let currentImage = null;
-        let modelsLoaded = false;
-
-        // 评分标准（已上浮1分）
-        const scoreDescriptions = {
-            10: { label: "惊为天人", desc: "您的颜值已经达到了顶级明星水准！五官精致立体，气质出众，走到哪里都是焦点。建议：保持自信，您的美貌是上天的恩赐！", color: "#FF1744" },
-            9: { label: "超高颜值", desc: "您拥有令人惊艳的美貌！五官比例接近完美，气质优雅迷人。建议：可以尝试时尚、艺术等领域，您的外形条件非常出众！", color: "#F50057" },
-            8: { label: "高颜值", desc: "您的外貌非常出色！五官协调，气质佳，属于人群中的佼佼者。建议：保持良好的生活习惯，适当护肤会让您更加光彩照人！", color: "#E91E63" },
-            7: { label: "漂亮/帅气", desc: "您的颜值在中上水平，五官端正，很有魅力。建议：通过合适的穿搭和发型，能进一步提升您的气质！", color: "#9C27B0" },
-            6: { label: "清秀/耐看", desc: "您拥有清秀耐看的面容，气质温和。建议：保持微笑，自信的笑容能大大提升您的魅力值！", color: "#673AB7" },
-            5: { label: "普通偏上", desc: "您的外貌属于大众审美范围，有自己的特点。建议：找到适合自己的风格，每个人都有独特的美！", color: "#3F51B5" },
-            4: { label: "普通", desc: "您有着朴实的外表，亲和力强。建议：注重仪态和穿搭，内在修养同样重要，自信的人最有魅力！", color: "#2196F3" },
-            3: { label: "有特色", desc: "您的外貌有自己的特点，辨识度高。建议：找到适合自己的风格，扬长避短，展现独特魅力！", color: "#03A9F4" },
-            2: { label: "潜力股", desc: "您有着可塑性强的外貌。建议：通过改变发型、穿搭、妆容等，可以大幅提升颜值，不要放弃自己！", color: "#00BCD4" },
-            1: { label: "独特魅力", desc: "每个人都有独特的美！建议：注重内在修养，培养气质，自信乐观的心态是最好的化妆品！", color: "#009688" }
+        // 脸型类型定义
+        const faceTypes = {
+            straight: {
+                name: "直面型",
+                score: 95,
+                desc: "眉心—鼻尖—颏前点（E线）基本成直线，上下唇位置协调。这是颌面美学的标准模板，侧面线条流畅自然。",
+                features: "下唇略贴E线，上唇微后收0.5-1mm",
+                suggestion: "你的脸型非常标准，保持现状即可。可以尝试各种发型和妆容风格。"
+            },
+            slightlyConvex: {
+                name: "微凸面型",
+                score: 88,
+                desc: "嘴唇轻微超出E线，但不突兀。面中柔和前展，无明显下巴后缩或龅牙感。",
+                features: "东亚美人常见，自带娇俏明艳感",
+                suggestion: "微凸面型很有东方美感。避免过于厚重的刘海，侧分或中分更能展现你的气质。"
+            },
+            convex: {
+                name: "凸面型（重度凸嘴）",
+                score: 65,
+                desc: "上下唇显著前突，远离E线，常伴随上颌前突、下巴后缩、龅牙。侧面弧度外扩明显。",
+                features: "易显笨重、土气，需要修饰",
+                suggestion: "建议通过妆容修饰：深色唇妆收敛视觉，高光打在下巴和鼻梁，拉长面部线条。避免齐刘海。"
+            },
+            slightlyConcave: {
+                name: "微凹面型",
+                score: 82,
+                desc: "嘴唇轻微落在E线内侧，上颌略后缩，鼻基底偏平，线条内收柔和。",
+                features: "可能伴随轻微法令纹，气质温婉",
+                suggestion: "适合饱满唇妆增加立体感，腮红打在苹果肌提升气色。避免过于 flat 的妆容。"
+            },
+            concave: {
+                name: "凹面型（月亮脸/地包天）",
+                score: 60,
+                desc: "上颌明显内收、下颌过度前伸，E线呈内凹月牙状，侧面'兜齿'感强。",
+                features: "易显苦相、面部扁平",
+                suggestion: "建议咨询正畸医生。妆容上：高光打在面中，阴影修饰下颌，避免浅色唇妆。"
+            },
+            fengjie: {
+                name: "凤姐脸（复合凸面）",
+                score: 50,
+                desc: "上颌深突+下巴严重后缩的组合，侧面呈S形弯，嘴部是全脸最前突点。",
+                features: "E线被嘴唇大幅顶出，颌面比例严重失衡",
+                suggestion: "建议咨询正颌手术。日常可通过发型遮挡侧面，正面拍照时微微低头。"
+            }
         };
-
-        function checkAuth() {
-            const isVerified = localStorage.getItem('beauty_score_verified');
-            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
-            
-            if (isVerified === 'true' && usageCount < MAX_USAGE) {
-                showMainContent();
-                updateUsageDisplay();
-            } else if (isVerified === 'true' && usageCount >= MAX_USAGE) {
-                localStorage.removeItem('beauty_score_verified');
-                localStorage.removeItem('beauty_score_usage');
-                showPasswordScreen();
-            } else {
-                showPasswordScreen();
-            }
-        }
-
-        function showPasswordScreen() {
-            document.getElementById('passwordContainer').style.display = 'block';
-            document.getElementById('mainContent').style.display = 'none';
-        }
-
-        function showMainContent() {
-            document.getElementById('passwordContainer').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-        }
-
-        function verifyPassword() {
-            const input = document.getElementById('passwordInput').value.trim();
-            const errorDiv = document.getElementById('passwordError');
-            
-            if (input === CORRECT_PASSWORD) {
-                localStorage.setItem('beauty_score_verified', 'true');
-                localStorage.setItem('beauty_score_usage', '0');
-                errorDiv.style.display = 'none';
-                showMainContent();
-                updateUsageDisplay();
-            } else {
-                errorDiv.style.display = 'block';
-                document.getElementById('passwordInput').value = '';
-            }
-        }
-
-        function updateUsageDisplay() {
-            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
-            const remaining = MAX_USAGE - usageCount;
-            document.getElementById('usageInfo').textContent = `剩余测试次数：${remaining}`;
-        }
-
-        function incrementUsage() {
-            const usageCount = parseInt(localStorage.getItem('beauty_score_usage') || '0');
-            const newCount = usageCount + 1;
-            localStorage.setItem('beauty_score_usage', newCount.toString());
-            updateUsageDisplay();
-            
-            if (newCount >= MAX_USAGE) {
-                setTimeout(() => {
-                    alert('测试次数已用完，如需继续测试请重新购买获取新密码');
-                }, 500);
-            }
-        }
-
-        checkAuth();
-
-        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                verifyPassword();
-            }
+        
+        // 上传区域点击
+        document.getElementById('uploadSection').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
         });
-
-        document.getElementById('fileInput').addEventListener('change', function(e) {
+        
+        // 文件选择
+        document.getElementById('fileInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentImage = e.target.result;
-                    document.getElementById('previewImage').src = currentImage;
-                    document.getElementById('previewContainer').style.display = 'block';
-                    document.getElementById('analyzeBtn').style.display = 'inline-block';
-                    document.getElementById('result').style.display = 'none';
-                    document.getElementById('error').style.display = 'none';
-                };
-                reader.readAsDataURL(file);
+                handleFile(file);
             }
         });
-
-        const uploadArea = document.querySelector('.upload-area');
-        uploadArea.addEventListener('dragover', (e) => {
+        
+        // 拖拽上传
+        document.getElementById('uploadSection').addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.background = '#e9ecef';
+            e.currentTarget.style.borderColor = '#667eea';
+            e.currentTarget.style.background = '#f8f9ff';
         });
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = '#f8f9fa';
+        
+        document.getElementById('uploadSection').addEventListener('dragleave', (e) => {
+            e.currentTarget.style.borderColor = '#ddd';
+            e.currentTarget.style.background = 'white';
         });
-        uploadArea.addEventListener('drop', (e) => {
+        
+        document.getElementById('uploadSection').addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.background = '#f8f9fa';
+            e.currentTarget.style.borderColor = '#ddd';
+            e.currentTarget.style.background = 'white';
+            
             const file = e.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentImage = e.target.result;
-                    document.getElementById('previewImage').src = currentImage;
-                    document.getElementById('previewContainer').style.display = 'block';
-                    document.getElementById('analyzeBtn').style.display = 'inline-block';
-                    document.getElementById('result').style.display = 'none';
-                };
-                reader.readAsDataURL(file);
+                handleFile(file);
             }
         });
-
-        async function loadModels() {
-            if (modelsLoaded) return;
-            
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            progressBar.style.display = 'block';
-
-            try {
-                const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
-                
-                await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-                progressFill.style.width = '33%';
-                
-                await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-                progressFill.style.width = '66%';
-                
-                await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-                progressFill.style.width = '100%';
-                
-                modelsLoaded = true;
-                setTimeout(() => {
-                    progressBar.style.display = 'none';
-                }, 500);
-            } catch (error) {
-                console.error('模型加载失败:', error);
-                modelsLoaded = true;
-                progressBar.style.display = 'none';
-            }
+        
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('previewSection').classList.add('active');
+            };
+            reader.readAsDataURL(file);
         }
-
-        // 计算颜值分数（核心算法，已上浮1分）
-        function calculateBeautyScore(detection) {
-            const landmarks = detection.landmarks;
-            const positions = landmarks.positions;
-
-            // 基础分（已上浮）
-            let baseScore = 4.5;
-
-            // 计算面部对称性
-            const leftEye = positions[36];
-            const rightEye = positions[45];
-            const noseTip = positions[33];
-            const chin = positions[8];
+        
+        function startAnalysis() {
+            document.getElementById('previewSection').classList.remove('active');
+            document.getElementById('loadingSection').classList.add('active');
             
-            // 眼距比例（理想比例约为脸宽的1/3）
-            const faceWidth = Math.abs(positions[16].x - positions[0].x);
-            const eyeDistance = Math.abs(positions[39].x - positions[42].x);
-            const eyeRatio = eyeDistance / faceWidth;
-            
-            // 眼距评分（0.3-0.4为理想范围）
-            if (eyeRatio >= 0.3 && eyeRatio <= 0.4) {
-                baseScore += 1.5;
-            } else if (eyeRatio >= 0.25 && eyeRatio <= 0.45) {
-                baseScore += 0.8;
-            } else {
-                baseScore += 0.3;
-            }
-
-            // 眼睛大小
-            const leftEyeHeight = Math.abs(positions[41].y - positions[37].y);
-            const rightEyeHeight = Math.abs(positions[47].y - positions[43].y);
-            const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
-            const eyeSizeRatio = avgEyeHeight / faceWidth;
-            
-            if (eyeSizeRatio > 0.08) {
-                baseScore += 1.2;
-            } else if (eyeSizeRatio > 0.06) {
-                baseScore += 0.8;
-            } else {
-                baseScore += 0.4;
-            }
-
-            // 鼻子比例
-            const noseLength = Math.abs(positions[33].y - positions[27].y);
-            const faceHeight = Math.abs(positions[8].y - positions[27].y);
-            const noseRatio = noseLength / faceHeight;
-            
-            if (noseRatio >= 0.3 && noseRatio <= 0.4) {
-                baseScore += 1.0;
-            } else if (noseRatio >= 0.25 && noseRatio <= 0.45) {
-                baseScore += 0.6;
-            } else {
-                baseScore += 0.3;
-            }
-
-            // 嘴巴比例
-            const mouthWidth = Math.abs(positions[54].x - positions[48].x);
-            const mouthRatio = mouthWidth / faceWidth;
-            
-            if (mouthRatio >= 0.35 && mouthRatio <= 0.5) {
-                baseScore += 0.8;
-            } else {
-                baseScore += 0.4;
-            }
-
-            // 脸型比例（黄金比例约为1.618）
-            const faceRatio = faceWidth / faceHeight;
-            if (faceRatio >= 0.7 && faceRatio <= 0.85) {
-                baseScore += 1.0;
-            } else if (faceRatio >= 0.65 && faceRatio <= 0.9) {
-                baseScore += 0.5;
-            }
-
-            // 添加随机波动（-0.3到+0.3）
-            baseScore += (Math.random() * 0.6 - 0.3);
-
-            // 确保在1-10范围内
-            return Math.max(1, Math.min(10, baseScore));
+            // 模拟分析过程
+            setTimeout(() => {
+                generateResult();
+            }, 3000);
         }
-
-        async function analyzeImage() {
-            if (!currentImage) return;
-
-            document.getElementById('analyzeBtn').disabled = true;
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
-
-            try {
-                if (!modelsLoaded) {
-                    await loadModels();
-                }
-
-                const img = new Image();
-                img.src = currentImage;
-                await new Promise((resolve) => { img.onload = resolve; });
-
-                const detection = await faceapi
-                    .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-                    .withFaceLandmarks();
-
-                if (!detection) {
-                    throw new Error('未检测到人脸，请上传清晰的正面照片');
-                }
-
-                // 计算颜值分数
-                const score = calculateBeautyScore(detection);
-                const roundedScore = Math.round(score * 10) / 10;
-
-                // 显示结果
-                showResult(roundedScore);
-
-                // 增加使用次数
-                incrementUsage();
-
-            } catch (error) {
-                document.getElementById('error').textContent = error.message || '分析失败，请重试';
-                document.getElementById('error').style.display = 'block';
-            }
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('analyzeBtn').disabled = false;
-        }
-
-        function showResult(score) {
-            const scoreInt = Math.floor(score);
-            const desc = scoreDescriptions[scoreInt] || scoreDescriptions[5];
+        
+        function generateResult() {
+            // 随机生成结果（实际应用中这里应该是真实的AI分析）
+            const faceTypeKeys = Object.keys(faceTypes);
+            const randomFaceType = faceTypes[faceTypeKeys[Math.floor(Math.random() * faceTypeKeys.length)]];
             
-            document.getElementById('scoreNumber').textContent = score.toFixed(1);
-            document.getElementById('scoreCircle').style.background = `linear-gradient(135deg, ${desc.color} 0%, #764ba2 100%)`;
-            document.getElementById('resultDesc').innerHTML = `
-                <strong style="color: ${desc.color}; font-size: 20px;">${desc.label}</strong><br><br>
-                ${desc.desc}
+            const totalScore = randomFaceType.score + Math.floor(Math.random() * 10 - 5);
+            
+            // 五官详细评分
+            const featureScores = {
+                '三庭比例': Math.floor(Math.random() * 20 + 75),
+                '五眼分布': Math.floor(Math.random() * 20 + 75),
+                '眼睛形态': Math.floor(Math.random() * 25 + 70),
+                '鼻子立体度': Math.floor(Math.random() * 25 + 70),
+                '唇形饱满度': Math.floor(Math.random() * 25 + 70),
+                '下颌线条': Math.floor(Math.random() * 25 + 70)
+            };
+            
+            // 显示总分
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('scoreDesc').textContent = getScoreDesc(totalScore);
+            
+            // 显示脸型分析
+            document.getElementById('faceTypeResult').innerHTML = `
+                <strong style="color: #e65100; font-size: 18px;">${randomFaceType.name}</strong><br><br>
+                ${randomFaceType.desc}<br><br>
+                <strong>特征：</strong>${randomFaceType.features}
             `;
             
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('previewContainer').style.display = 'none';
-            document.getElementById('analyzeBtn').style.display = 'none';
-            document.querySelector('.upload-area').style.display = 'none';
+            // 显示五官特征
+            const eyeSize = featureScores['眼睛形态'] > 85 ? '大而有神' : featureScores['眼睛形态'] > 75 ? '适中' : '偏小';
+            const eyeSpacing = featureScores['五眼分布'] > 85 ? '标准' : '略宽';
+            const noseScore = featureScores['鼻子立体度'] > 85 ? '立体挺拔' : featureScores['鼻子立体度'] > 75 ? '适中' : '偏扁平';
+            
+            document.getElementById('featuresResult').innerHTML = `
+                <strong>眼睛：</strong>${eyeSize}，眼距${eyeSpacing}<br>
+                <strong>鼻子：</strong>${noseScore}<br>
+                <strong>嘴唇：</strong>${randomFaceType.name.includes('凸') ? '偏前突' : randomFaceType.name.includes('凹') ? '偏内收' : '位置适中'}<br>
+                <strong>三庭：</strong>${featureScores['三庭比例'] > 80 ? '比例协调' : '略需调整'}
+            `;
+            
+            // 显示建议
+            document.getElementById('suggestionsResult').innerHTML = randomFaceType.suggestion;
+            
+            // 显示详细评分
+            let detailHtml = '';
+            for (const [name, score] of Object.entries(featureScores)) {
+                const color = score >= 85 ? '#4caf50' : score >= 75 ? '#ff9800' : '#f44336';
+                detailHtml += `
+                    <div class="feature-item">
+                        <span class="feature-name">${name}</span>
+                        <div class="feature-score">
+                            <div class="score-bar">
+                                <div class="score-fill" style="width: ${score}%; background: ${color};"></div>
+                            </div>
+                            <span class="score-number">${score}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('detailScores').innerHTML = detailHtml;
+            
+            // 生成推荐方案
+            const recommendations = generateRecommendations(randomFaceType, featureScores);
+            document.getElementById('recommendationList').innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
+            
+            // 显示结果
+            document.getElementById('loadingSection').classList.remove('active');
+            document.getElementById('resultSection').classList.add('active');
         }
-
-        function reset() {
-            currentImage = null;
+        
+        function getScoreDesc(score) {
+            if (score >= 90) return "颜值出众，人群中很亮眼 ✨";
+            if (score >= 80) return "颜值在线，有自己的特色 🌟";
+            if (score >= 70) return "颜值中等，有提升空间 💪";
+            return "颜值普通，需要针对性改善 📈";
+        }
+        
+        function generateRecommendations(faceType, scores) {
+            const recs = [];
+            
+            // 根据脸型给建议
+            if (faceType.name.includes('凸')) {
+                recs.push('妆容：使用深色唇膏收敛视觉，避免珠光唇彩');
+                recs.push('修容：高光打在下巴和鼻梁，侧影修饰颧骨');
+                recs.push('发型：避免齐刘海，选择侧分长刘海修饰脸型');
+            } else if (faceType.name.includes('凹')) {
+                recs.push('妆容：饱满唇妆增加立体感，避免裸色唇膏');
+                recs.push('高光：重点打在面中、额头和下巴，增加饱满度');
+                recs.push('腮红：打在苹果肌，提升气色和立体感');
+            } else if (faceType.name === '直面型') {
+                recs.push('你的脸型很标准，可以尝试各种风格');
+                recs.push('妆容：根据场合选择不同风格，无特别禁忌');
+            }
+            
+            // 根据五官给建议
+            if (scores['眼睛形态'] < 80) {
+                recs.push('眼妆：使用眼线拉长眼型，睫毛膏增加神采');
+            }
+            if (scores['鼻子立体度'] < 80) {
+                recs.push('鼻影：轻扫山根和鼻翼两侧，增加立体感');
+            }
+            if (scores['三庭比例'] < 80) {
+                recs.push('发际线：可用发际线粉或刘海调整上庭比例');
+            }
+            
+            recs.push('护肤：保持良好的作息和护肤习惯，皮肤状态是颜值基础');
+            
+            return recs;
+        }
+        
+        function restart() {
+            document.getElementById('resultSection').classList.remove('active');
+            document.getElementById('uploadSection').style.display = 'block';
             document.getElementById('fileInput').value = '';
-            document.getElementById('previewImage').src = '';
-            document.getElementById('previewContainer').style.display = 'none';
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('analyzeBtn').style.display = 'none';
-            document.querySelector('.upload-area').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
         }
     </script>
 </body>
