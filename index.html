@@ -426,6 +426,13 @@
                     </div>
                 </div>
                 
+                <div class="analysis-card" style="background: #fce4ec; border-left-color: #e91e63;">
+                    <h3 style="color: #c2185b;"><span class="icon">🖌️</span> 眉形分析</h3>
+                    <div class="analysis-content" id="browResult">
+                        分析中...
+                    </div>
+                </div>
+                
                 <div class="analysis-card suggestions">
                     <h3><span class="icon">💡</span> 变美建议</h3>
                     <div class="analysis-content" id="suggestionsResult">
@@ -449,6 +456,75 @@
     </div>
 
     <script>
+        // 眉形类型定义（纯描述，不含独立评分，评分由眉形与脸型的匹配度决定）
+        const browTypes = {
+            wild: {
+                name: "野生眉",
+                desc: "毛发根根分明，还原原生眉毛的蓬松杂乱感，自带原生氛围感。",
+                features: "毛流感强，眉毛蓬松自然，根根分明，保留原生杂乱质感",
+                matchFace: ["骨相立体的脸型"],
+                suggestion: "野生眉重在保留原生感！只需修掉明显多余的杂毛，用眉梳顺着毛流方向梳理。可用透明眉胶轻轻定型，保持蓬松但不凌乱。"
+            },
+            willow: {
+                name: "柳叶眉",
+                desc: "线条纤细弯曲，状如柳叶，古典温柔，可以柔和脸部棱角。",
+                features: "眉头较细，眉腰平滑弯曲过渡，眉尾自然收尖，整体线条如柳叶般流畅",
+                matchFace: ["鹅蛋脸", "瓜子脸"],
+                suggestion: "柳叶眉需要精细修整保持弧度！用眉笔沿眉毛生长方向轻描，眉尾自然收尖。日常可用细头眉笔勾勒眉尾弧度。"
+            },
+            flat: {
+                name: "平眉",
+                desc: "线条平直硬朗，弱化脸部纵向比例，能够拉宽脸型，自带干练气场。",
+                features: "眉头到眉尾基本水平，没有明显眉峰，整体线条平直",
+                matchFace: ["长脸"],
+                suggestion: "平眉画法：眉头轻描，中段均匀填充，眉尾不超过眼尾延长线。上下边缘保持平行，用眉粉比眉笔更自然。"
+            },
+            drooping: {
+                name: "落尾眉",
+                desc: "眉头高挑，眉尾自然下落，自带无辜感，可以柔和尖锐的脸部线条。",
+                features: "眉头位置略高，眉尾走势自然向下，形成温柔的弧线",
+                matchFace: ["菱形脸"],
+                suggestion: "落尾眉注意眉尾不要落得太低，最低点不低于眉头。画眉时先确定眉尾落点，再从眉头往后自然过渡。"
+            },
+            sword: {
+                name: "剑眉",
+                desc: "眉形如剑，从眉头到眉尾逐渐上扬，线条锋利有力，英气十足。",
+                features: "眉头粗壮，向眉尾逐渐变细上扬，眉峰靠后且角度锐利",
+                matchFace: ["方脸", "国字脸"],
+                suggestion: "剑眉天生自带气场！修眉时保持上扬走势和锋利线条。眉头用眉粉自然晕开，眉尾用眉笔利落收尖。"
+            },
+            arched: {
+                name: "弯月眉",
+                desc: "眉形有明显的弧度，眉峰柔和上扬，如弯月般优雅，是最百搭的眉形之一。",
+                features: "眉峰位于眉毛2/3处，弧度自然圆润，眉尾微微下收",
+                matchFace: ["方脸", "圆脸", "各种脸型"],
+                suggestion: "弯月眉是百搭眉形！修眉时注意保持弧度对称，眉峰不要过于尖锐，眉峰到眉尾的过渡要自然平滑。"
+            },
+            peaked: {
+                name: "挑眉",
+                desc: "眉峰高挑明显，转折角度大，给人凌厉精明的感觉，适合打造强气场妆容。",
+                features: "眉峰角度大且位置偏高，眉尾下落明显，整体呈折线形",
+                matchFace: ["圆脸", "短脸"],
+                suggestion: "挑眉自带气场！想日常柔和些可用眉粉填充眉峰下方三角区域。想更凌厉就用眉笔加强眉峰角度。"
+            }
+        };
+        
+        // 眉形-脸型匹配评分表（眉形与脸型的和谐度决定分数）
+        const browFaceMatch = {
+            // 直面型 - 标准脸型，大部分眉形都适合
+            '直面型': { '柳叶眉': 92, '弯月眉': 93, '野生眉': 88, '平眉': 85, '剑眉': 90, '落尾眉': 86, '挑眉': 87 },
+            // 微凸面型 - 东亚美人，柔和的眉形更合适
+            '微凸面型': { '柳叶眉': 93, '弯月眉': 91, '野生眉': 85, '平眉': 82, '剑眉': 80, '落尾眉': 88, '挑眉': 83 },
+            // 丰润型面型 - 脸部线条柔和外扩，需要有弧度的眉形平衡
+            '丰润型面型': { '柳叶眉': 90, '弯月眉': 92, '野生眉': 80, '平眉': 75, '剑眉': 82, '落尾眉': 78, '挑眉': 88 },
+            // 微凹面型 - 线条内收，需要增加面部存在感的眉形
+            '微凹面型': { '柳叶眉': 85, '弯月眉': 88, '野生眉': 90, '平眉': 86, '剑眉': 87, '落尾眉': 82, '挑眉': 84 },
+            // 柔和型面型 - 轮廓温婉，搭配柔和或有存在感的眉形
+            '柔和型面型': { '柳叶眉': 86, '弯月眉': 89, '野生眉': 91, '平眉': 84, '剑眉': 85, '落尾眉': 83, '挑眉': 82 },
+            // 立体型面型 - 面部起伏明显，需要有力度的眉形
+            '立体型面型': { '柳叶眉': 78, '弯月眉': 83, '野生眉': 93, '平眉': 76, '剑眉': 92, '落尾眉': 80, '挑眉': 88 }
+        };
+        
         // 脸型类型定义
         const faceTypes = {
             straight: {
@@ -558,11 +634,21 @@
             
             const totalScore = randomFaceType.score + Math.floor(Math.random() * 10 - 5);
             
+            // 随机选取眉形
+            const browTypeKeys = Object.keys(browTypes);
+            const randomBrowType = browTypes[browTypeKeys[Math.floor(Math.random() * browTypeKeys.length)]];
+            
+            // 根据眉形与脸型的匹配度计算眉形协调度评分
+            const matchTable = browFaceMatch[randomFaceType.name] || {};
+            const browMatchScore = matchTable[randomBrowType.name] || (Math.floor(Math.random() * 15 + 75));
+            const browHarmonyScore = Math.min(99, Math.max(60, browMatchScore + Math.floor(Math.random() * 6 - 3)));
+            
             // 五官详细评分
             const featureScores = {
                 '三庭比例': Math.floor(Math.random() * 20 + 75),
                 '五眼分布': Math.floor(Math.random() * 20 + 75),
                 '眼睛形态': Math.floor(Math.random() * 25 + 70),
+                '眉脸协调度': browHarmonyScore,
                 '鼻子立体度': Math.floor(Math.random() * 25 + 70),
                 '唇形饱满度': Math.floor(Math.random() * 25 + 70),
                 '下颌线条': Math.floor(Math.random() * 25 + 70)
@@ -585,6 +671,7 @@
             const noseScore = featureScores['鼻子立体度'] > 85 ? '立体挺拔' : featureScores['鼻子立体度'] > 75 ? '适中' : '偏扁平';
             
             document.getElementById('featuresResult').innerHTML = `
+                <strong>眉形：</strong>${randomBrowType.name}（${randomBrowType.features}）<br>
                 <strong>眼睛：</strong>${eyeSize}，眼距${eyeSpacing}<br>
                 <strong>鼻子：</strong>${noseScore}<br>
                 <strong>嘴唇：</strong>${randomFaceType.name.includes('凸') ? '偏前突' : randomFaceType.name.includes('凹') ? '偏内收' : '位置适中'}<br>
@@ -593,6 +680,20 @@
             
             // 显示建议
             document.getElementById('suggestionsResult').innerHTML = randomFaceType.suggestion;
+            
+            // 显示眉形分析
+            const browIsMatch = browHarmonyScore >= 88;
+            const browMatchDesc = browIsMatch 
+                ? `你的${randomBrowType.name}与${randomFaceType.name}非常和谐，眉脸搭配协调！` 
+                : `你的${randomBrowType.name}与${randomFaceType.name}搭配有优化空间，可以通过画眉技巧调整。`;
+            document.getElementById('browResult').innerHTML = `
+                <strong style="color: #c2185b; font-size: 18px;">${randomBrowType.name}</strong><br><br>
+                ${randomBrowType.desc}<br><br>
+                <strong>特征：</strong>${randomBrowType.features}<br>
+                <strong>适配脸型：</strong>${randomBrowType.matchFace.join('、')}<br>
+                <strong>与当前脸型匹配：</strong>${browMatchDesc}<br><br>
+                <strong>修饰建议：</strong>${randomBrowType.suggestion}
+            `;
             
             // 显示详细评分
             let detailHtml = '';
@@ -613,7 +714,7 @@
             document.getElementById('detailScores').innerHTML = detailHtml;
             
             // 生成推荐方案
-            const recommendations = generateRecommendations(randomFaceType, featureScores);
+            const recommendations = generateRecommendations(randomFaceType, featureScores, randomBrowType);
             document.getElementById('recommendationList').innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
             
             // 显示结果
@@ -628,7 +729,7 @@
             return "每个人都是潜力股，找到适合自己的方式就能发光 🌱";
         }
         
-        function generateRecommendations(faceType, scores) {
+        function generateRecommendations(faceType, scores, browType) {
             const recs = [];
             
             // 通用建议
@@ -684,6 +785,41 @@
             
             if (scores['五眼分布'] < 80) {
                 recs.push('👀 眼距调整：眼距宽就加强内眼角眼线，眼距近就弱化内眼角');
+            }
+            
+            // 根据眉形给建议
+            if (browType) {
+                if (browType.name === '野生眉') {
+                    recs.push('🖌️ 眉毛打理：只修掉明显多余的杂毛，保留原生蓬松感');
+                    recs.push('🖌️ 定型技巧：用透明眉胶顺着毛流梳理定型，保持根根分明');
+                    recs.push('🖌️ 填补空缺：如有稀疏处，用极细眉笔模拟毛流一根根填补');
+                } else if (browType.name === '柳叶眉') {
+                    recs.push('🖌️ 弧度维护：定期修整保持柳叶弧线，眉尾自然收尖');
+                    recs.push('🖌️ 画眉技巧：沿眉毛生长方向轻描，用细头眉笔勾勒眉尾弧度');
+                    recs.push('🖌️ 下缘修整：保持眉毛下缘干净利落，上缘弧线流畅');
+                } else if (browType.name === '平眉') {
+                    recs.push('🖌️ 平直保持：眉头到眉尾保持水平，上下边缘平行');
+                    recs.push('🖌️ 眉尾控制：眉尾不要超过眼尾延长线，用眉粉填充比眉笔更自然');
+                    recs.push('🖌️ 长度注意：平眉不宜过长，否则会显得拖沓无力');
+                } else if (browType.name === '落尾眉') {
+                    recs.push('🖌️ 落尾把控：眉尾最低点不要低于眉头，避免显没精神');
+                    recs.push('🖌️ 过渡自然：从眉头到眉尾自然过渡，用浅色眉粉打底');
+                    recs.push('🖌️ 无辜感打造：搭配下至眼线和腮红，放大无辜可爱感');
+                } else if (browType.name === '剑眉') {
+                    recs.push('🖌️ 锋利线条：保持从眉头到眉尾的上扬走势，眉尾利落收尖');
+                    recs.push('🖌️ 眉头处理：眉头用眉粉自然晕开，避免过于生硬');
+                    recs.push('🖌️ 柔化方法：如果想日常温柔些，可以把眉峰角度稍微圆润处理');
+                } else if (browType.name === '弯月眉') {
+                    recs.push('🖌️ 对称是关键：弯月眉最怕两边不对称，画眉时先对比再填充');
+                    recs.push('🖌️ 眉峰柔和：眉峰不要过于尖锐，圆润过渡最自然');
+                } else if (browType.name === '挑眉') {
+                    recs.push('🖌️ 眉峰柔化：用眉粉填充眉峰下方三角区，降低尖锐感');
+                    recs.push('🖌️ 眉头晕染：眉头用刷子晕染自然，避免过于生硬的起笔');
+                    recs.push('🖌️ 气场搭配：挑眉搭配猫眼眼线，气场直接拉满');
+                } else {
+                    recs.push('🖌️ 眉毛保养：定期修整眉形，保持对称和清洁的轮廓');
+                    recs.push('🖌️ 眉眼搭配：画眉时注意与眼妆风格统一，淡妆配淡眉，浓妆配重眉');
+                }
             }
             
             // 穿搭通用建议
