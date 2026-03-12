@@ -10,833 +10,1733 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            background: #0a0a1a;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 动态粒子背景 */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
         }
-        
+
         .container {
             max-width: 800px;
+            width: 100%;
             margin: 0 auto;
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
         }
-        
+
         .header h1 {
-            font-size: 32px;
-            color: #333;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-size: 36px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #a78bfa, #f472b6, #fb923c);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
+            letter-spacing: 2px;
         }
-        
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
         .header p {
-            color: #666;
-            font-size: 16px;
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 15px;
+            letter-spacing: 1px;
         }
-        
-        .upload-section {
-            border: 3px dashed #ddd;
-            border-radius: 20px;
-            padding: 60px 40px;
+
+        /* 标签页 */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 28px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 5px;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 12px 0;
             text-align: center;
-            margin-bottom: 30px;
-            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        
+
+        .tab-item.active {
+            background: rgba(167, 139, 250, 0.25);
+            color: #c4b5fd;
+            font-weight: 600;
+        }
+
+        .tab-item:hover:not(.active) {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        /* 上传区域 */
+        .upload-section {
+            border: 2px dashed rgba(167, 139, 250, 0.3);
+            border-radius: 22px;
+            padding: 55px 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            background: rgba(167, 139, 250, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.06), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .upload-section:hover::before {
+            left: 100%;
+        }
+
         .upload-section:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
+            border-color: rgba(167, 139, 250, 0.6);
+            background: rgba(167, 139, 250, 0.08);
+            transform: translateY(-2px);
         }
-        
+
+        .upload-section.drag-over {
+            border-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.12);
+            transform: scale(1.02);
+        }
+
         .upload-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
+            font-size: 56px;
+            margin-bottom: 18px;
+            display: block;
         }
-        
+
         .upload-text {
             font-size: 18px;
-            color: #333;
+            color: rgba(255, 255, 255, 0.85);
             margin-bottom: 10px;
+            font-weight: 500;
         }
-        
+
         .upload-hint {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 22px;
+        }
+
+        .upload-btn {
+            padding: 12px 28px;
+            border-radius: 14px;
             font-size: 14px;
-            color: #999;
-        }
-        
-        #fileInput {
-            display: none;
-        }
-        
-        .preview-section {
-            display: none;
-            margin-bottom: 30px;
-        }
-        
-        .preview-section.active {
-            display: block;
-        }
-        
-        .preview-image {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto 20px;
-            display: block;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .analyze-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 18px 50px;
-            border-radius: 30px;
-            font-size: 18px;
             cursor: pointer;
             transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
+        }
+
+        .upload-btn-primary {
+            background: linear-gradient(135deg, #a78bfa, #818cf8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+        }
+
+        .upload-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.45);
+        }
+
+        .upload-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .upload-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: white;
+        }
+
+        #fileInput, #cameraInput {
+            display: none;
+        }
+
+        /* 预览区 */
+        .preview-section {
+            display: none;
+            margin-bottom: 28px;
+        }
+
+        .preview-section.active {
+            display: block;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .preview-image {
+            max-width: 380px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-badge {
+            position: absolute;
+            top: 14px;
+            right: calc(50% - 190px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+            color: white;
+            border: none;
+            padding: 18px 56px;
+            border-radius: 50px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.4s ease;
             display: block;
             margin: 0 auto;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .analyze-btn:hover::before {
+            left: 100%;
+        }
+
         .analyze-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(167, 139, 250, 0.5);
         }
-        
+
         .analyze-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
-        
+
+        /* 加载动画 */
         .loading {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 50px 20px;
         }
-        
+
         .loading.active {
             display: block;
+            animation: fadeSlideIn 0.4s ease;
         }
-        
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+
+        .loading-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+
+        .loading-ring svg {
+            width: 80px;
+            height: 80px;
+            transform: rotate(-90deg);
+        }
+
+        .loading-ring circle {
+            fill: none;
+            stroke-width: 4;
+        }
+
+        .loading-ring .bg {
+            stroke: rgba(255, 255, 255, 0.08);
+        }
+
+        .loading-ring .progress {
+            stroke: url(#loadGradient);
+            stroke-linecap: round;
+            stroke-dasharray: 226;
+            stroke-dashoffset: 226;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .loading-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c4b5fd;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .loading-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .loading-step {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            min-height: 20px;
+        }
+
+        .loading-steps {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.done {
+            color: #4ade80;
+        }
+
+        .step-item.current {
+            color: #c4b5fd;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .step-item.done .step-dot {
+            background: #4ade80;
         }
-        
+
+        .step-item.current .step-dot {
+            background: #a78bfa;
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.6);
+            animation: pulse 1.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
+
+        /* 结果区域 */
         .result-section {
             display: none;
         }
-        
+
         .result-section.active {
             display: block;
-            animation: fadeIn 0.5s ease;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
+
+        /* 总分卡片 */
         .score-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 20px;
-            padding: 40px;
+            background: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #fb923c 100%);
+            border-radius: 24px;
+            padding: 44px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+            animation: cardReveal 0.6s ease;
         }
-        
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -20px); }
+        }
+
         .score-label {
-            font-size: 18px;
-            margin-bottom: 10px;
-            opacity: 0.9;
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 8px;
+            position: relative;
         }
-        
+
         .score-value {
-            font-size: 72px;
-            font-weight: bold;
-            margin-bottom: 10px;
+            font-size: 80px;
+            font-weight: 800;
+            color: white;
+            position: relative;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+            margin-bottom: 12px;
         }
-        
+
+        .score-value .unit {
+            font-size: 28px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
         .score-desc {
-            font-size: 20px;
-            opacity: 0.9;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            font-weight: 500;
         }
-        
+
+        .score-stars {
+            margin-top: 12px;
+            font-size: 22px;
+            position: relative;
+            letter-spacing: 4px;
+        }
+
+        /* 明星对标 */
+        .celeb-match {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.6s ease 0.2s both;
+        }
+
+        .celeb-match h3 {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .celeb-list {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .celeb-tag {
+            background: rgba(167, 139, 250, 0.15);
+            color: #c4b5fd;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        /* 分析卡片网格 */
         .analysis-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 18px;
+            margin-bottom: 28px;
         }
-        
+
         .analysis-card {
-            background: #f8f9ff;
-            border-radius: 16px;
-            padding: 25px;
-            border-left: 4px solid #667eea;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            animation: fadeSlideIn 0.5s ease both;
         }
-        
+
+        .analysis-card:nth-child(1) { animation-delay: 0.1s; }
+        .analysis-card:nth-child(2) { animation-delay: 0.2s; }
+        .analysis-card:nth-child(3) { animation-delay: 0.3s; }
+        .analysis-card:nth-child(4) { animation-delay: 0.4s; }
+        .analysis-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .analysis-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
         .analysis-card h3 {
-            color: #333;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 17px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 18px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
-        
-        .analysis-card .icon {
-            font-size: 24px;
-        }
-        
+
+        .card-face .card-icon { background: rgba(251, 146, 60, 0.2); }
+        .card-features .card-icon { background: rgba(74, 222, 128, 0.2); }
+        .card-brow .card-icon { background: rgba(244, 114, 182, 0.2); }
+        .card-lip .card-icon { background: rgba(248, 113, 113, 0.2); }
+        .card-suggest .card-icon { background: rgba(96, 165, 250, 0.2); }
+
         .analysis-content {
-            color: #555;
-            line-height: 1.8;
-            font-size: 15px;
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.85;
+            font-size: 14px;
         }
-        
-        .face-type {
-            background: #fff3e0;
-            border-left-color: #ff9800;
+
+        .analysis-content strong {
+            color: rgba(255, 255, 255, 0.85);
         }
-        
-        .face-type h3 {
-            color: #e65100;
+
+        /* 雷达图区域 */
+        .radar-section {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.5s ease 0.5s both;
         }
-        
-        .features {
-            background: #e8f5e9;
-            border-left-color: #4caf50;
-        }
-        
-        .features h3 {
-            color: #2e7d32;
-        }
-        
-        .suggestions {
-            background: #e3f2fd;
-            border-left-color: #2196f3;
-        }
-        
-        .suggestions h3 {
-            color: #1565c0;
-        }
-        
-        .detail-section {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 16px;
-            padding: 25px;
+
+        .radar-section h4 {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 17px;
             margin-bottom: 20px;
+            text-align: center;
         }
-        
-        .detail-section h4 {
-            color: #333;
-            font-size: 16px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .feature-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .feature-item:last-child {
-            border-bottom: none;
-        }
-        
-        .feature-name {
-            color: #555;
-            font-size: 15px;
-        }
-        
-        .feature-score {
+
+        .radar-container {
             display: flex;
             align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #radarChart {
+            max-width: 280px;
+            width: 100%;
+        }
+
+        .radar-legend {
+            display: flex;
+            flex-direction: column;
             gap: 10px;
         }
-        
-        .score-bar {
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            min-width: 80px;
+        }
+
+        .legend-bar-wrap {
             width: 100px;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
             overflow: hidden;
         }
-        
-        .score-fill {
+
+        .legend-bar {
             height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
+            border-radius: 3px;
+            transition: width 1s ease;
+            width: 0;
         }
-        
-        .score-number {
-            font-weight: bold;
-            color: #667eea;
+
+        .legend-value {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 600;
             min-width: 30px;
             text-align: right;
         }
-        
+
+        /* 推荐方案 */
         .recommendation {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 16px;
-            padding: 25px;
-            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.5s ease 0.6s both;
         }
-        
+
         .recommendation h4 {
-            color: #333;
-            font-size: 18px;
-            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 17px;
+            margin-bottom: 18px;
         }
-        
+
         .recommendation ul {
             list-style: none;
             padding: 0;
         }
-        
+
         .recommendation li {
             padding: 10px 0;
-            padding-left: 25px;
+            padding-left: 28px;
             position: relative;
-            color: #555;
-            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.7;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
-        
+
+        .recommendation li:last-child {
+            border-bottom: none;
+        }
+
         .recommendation li::before {
-            content: "✨";
+            content: attr(data-icon);
             position: absolute;
             left: 0;
+            font-size: 14px;
         }
-        
-        .restart-btn {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 16px 40px;
-            border-radius: 30px;
-            font-size: 16px;
+
+        /* 底部操作栏 */
+        .action-bar {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            animation: fadeSlideIn 0.5s ease 0.7s both;
+        }
+
+        .action-btn {
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: block;
-            margin: 30px auto 0;
+            font-weight: 500;
+            border: none;
         }
-        
-        .restart-btn:hover {
-            background: #667eea;
+
+        .btn-restart {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-restart:hover {
+            background: rgba(255, 255, 255, 0.15);
             color: white;
         }
-        
+
+        .btn-share {
+            background: linear-gradient(135deg, #a78bfa, #f472b6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+        }
+
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.45);
+        }
+
+        /* 历史记录标签页 */
+        .history-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .history-empty .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .history-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-face {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .history-time {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 12px;
+        }
+
+        .history-score {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .history-clear {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .history-clear button {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .history-clear button:hover {
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 9999;
+            transition: transform 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 响应式 */
         @media (max-width: 600px) {
             .container {
-                padding: 20px;
+                padding: 24px 18px;
+                border-radius: 22px;
             }
-            
+
             .header h1 {
-                font-size: 24px;
+                font-size: 26px;
             }
-            
+
             .score-value {
-                font-size: 56px;
+                font-size: 60px;
             }
-            
+
             .analysis-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .upload-section {
+                padding: 40px 20px;
+            }
+
+            .preview-badge {
+                right: 14px;
+            }
+
+            .radar-container {
+                flex-direction: column;
+            }
+
+            .score-card {
+                padding: 30px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🌸 AI颜值测评</h1>
-            <p>专业脸型分析 + 五官特征评估 + 个性化变美建议</p>
-        </div>
-        
-        <div class="upload-section" id="uploadSection">
-            <div class="upload-icon">📷</div>
-            <div class="upload-text">点击或拖拽上传照片</div>
-            <div class="upload-hint">支持 JPG、PNG 格式，建议上传清晰的正面照</div>
-        </div>
-        
-        <input type="file" id="fileInput" accept="image/*">
-        
-        <div class="preview-section" id="previewSection">
-            <img class="preview-image" id="previewImage" alt="预览">
-            <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
-                🔍 开始智能分析
-            </button>
-        </div>
-        
-        <div class="loading" id="loadingSection">
-            <div class="spinner"></div>
-            <p>AI正在分析您的五官特征...</p>
-            <p style="font-size: 14px; color: #999; margin-top: 10px;">正在评估脸型、三庭五眼、五官比例</p>
-        </div>
-        
-        <div class="result-section" id="resultSection">
-            <div class="score-card">
-                <div class="score-label">综合颜值评分</div>
-                <div class="score-value" id="totalScore">--</div>
-                <div class="score-desc" id="scoreDesc">--</div>
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>AI 颜值测评</h1>
+                <p>专业脸型分析 / 五官特征评估 / 个性化变美建议</p>
             </div>
-            
-            <div class="analysis-grid">
-                <div class="analysis-card face-type">
-                    <h3><span class="icon">👤</span> 脸型分析</h3>
-                    <div class="analysis-content" id="faceTypeResult">
-                        分析中...
+
+            <div class="tab-bar">
+                <div class="tab-item active" onclick="switchTab('main')">测评</div>
+                <div class="tab-item" onclick="switchTab('history')">历史记录</div>
+            </div>
+
+            <div class="tab-content active" id="tab-main">
+                <div class="upload-section" id="uploadSection">
+                    <span class="upload-icon">📷</span>
+                    <div class="upload-text">点击上传或拖拽照片到这里</div>
+                    <div class="upload-hint">支持 JPG / PNG 格式，建议上传清晰的正面照</div>
+                    <div class="upload-buttons">
+                        <button class="upload-btn upload-btn-primary" onclick="event.stopPropagation(); document.getElementById('fileInput').click();">选择照片</button>
+                        <button class="upload-btn upload-btn-secondary" onclick="event.stopPropagation(); document.getElementById('cameraInput').click();">拍一张</button>
                     </div>
                 </div>
-                
-                <div class="analysis-card features">
-                    <h3><span class="icon">✨</span> 五官特征</h3>
-                    <div class="analysis-content" id="featuresResult">
-                        分析中...
+
+                <input type="file" id="fileInput" accept="image/*">
+                <input type="file" id="cameraInput" accept="image/*" capture="user">
+
+                <div class="preview-section" id="previewSection">
+                    <div class="preview-container">
+                        <img class="preview-image" id="previewImage" alt="预览">
+                        <span class="preview-badge">待分析</span>
+                    </div>
+                    <button class="analyze-btn" id="analyzeBtn" onclick="startAnalysis()">
+                        开始智能分析
+                    </button>
+                </div>
+
+                <div class="loading" id="loadingSection">
+                    <div class="loading-ring">
+                        <svg viewBox="0 0 80 80">
+                            <defs>
+                                <linearGradient id="loadGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#a78bfa"/>
+                                    <stop offset="100%" style="stop-color:#f472b6"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="bg" cx="40" cy="40" r="36"/>
+                            <circle class="progress" id="loadProgress" cx="40" cy="40" r="36"/>
+                        </svg>
+                        <div class="loading-percent" id="loadPercent">0%</div>
+                    </div>
+                    <p class="loading-text" id="loadingText">AI 正在分析中...</p>
+                    <p class="loading-step" id="loadingStep"></p>
+                    <div class="loading-steps">
+                        <div class="step-item" id="step1"><span class="step-dot"></span>人脸检测</div>
+                        <div class="step-item" id="step2"><span class="step-dot"></span>五官定位</div>
+                        <div class="step-item" id="step3"><span class="step-dot"></span>脸型识别</div>
+                        <div class="step-item" id="step4"><span class="step-dot"></span>综合评估</div>
                     </div>
                 </div>
-                
-                <div class="analysis-card" style="background: #fce4ec; border-left-color: #e91e63;">
-                    <h3 style="color: #c2185b;"><span class="icon">🖌️</span> 眉形分析</h3>
-                    <div class="analysis-content" id="browResult">
-                        分析中...
+
+                <div class="result-section" id="resultSection">
+                    <div class="score-card">
+                        <div class="score-label">综合颜值评分</div>
+                        <div class="score-value"><span id="totalScore">0</span><span class="unit"> 分</span></div>
+                        <div class="score-desc" id="scoreDesc"></div>
+                        <div class="score-stars" id="scoreStars"></div>
                     </div>
-                </div>
-                
-                <div class="analysis-card suggestions">
-                    <h3><span class="icon">💡</span> 变美建议</h3>
-                    <div class="analysis-content" id="suggestionsResult">
-                        生成中...
+
+                    <div class="celeb-match" id="celebMatch">
+                        <h3>🌟 与你气质相近的明星</h3>
+                        <div class="celeb-list" id="celebList"></div>
+                    </div>
+
+                    <div class="analysis-grid">
+                        <div class="analysis-card card-face">
+                            <h3><span class="card-icon">👤</span> 脸型分析</h3>
+                            <div class="analysis-content" id="faceTypeResult"></div>
+                        </div>
+                        <div class="analysis-card card-features">
+                            <h3><span class="card-icon">✨</span> 五官特征</h3>
+                            <div class="analysis-content" id="featuresResult"></div>
+                        </div>
+                        <div class="analysis-card card-brow">
+                            <h3><span class="card-icon">🖌️</span> 眉形分析</h3>
+                            <div class="analysis-content" id="browResult"></div>
+                        </div>
+                        <div class="analysis-card card-lip">
+                            <h3><span class="card-icon">👄</span> 唇形分析</h3>
+                            <div class="analysis-content" id="lipResult"></div>
+                        </div>
+                        <div class="analysis-card card-suggest">
+                            <h3><span class="card-icon">💡</span> 变美建议</h3>
+                            <div class="analysis-content" id="suggestionsResult"></div>
+                        </div>
+                    </div>
+
+                    <div class="radar-section">
+                        <h4>📊 五官详细评分</h4>
+                        <div class="radar-container">
+                            <canvas id="radarChart" width="280" height="280"></canvas>
+                            <div class="radar-legend" id="radarLegend"></div>
+                        </div>
+                    </div>
+
+                    <div class="recommendation">
+                        <h4>🎯 专属变美方案</h4>
+                        <ul id="recommendationList"></ul>
+                    </div>
+
+                    <div class="action-bar">
+                        <button class="action-btn btn-restart" onclick="restart()">重新测试</button>
+                        <button class="action-btn btn-share" onclick="shareResult()">分享结果</button>
                     </div>
                 </div>
             </div>
-            
-            <div class="detail-section">
-                <h4>📊 五官详细评分</h4>
-                <div id="detailScores"></div>
+
+            <div class="tab-content" id="tab-history">
+                <div id="historyContainer"></div>
             </div>
-            
-            <div class="recommendation">
-                <h4>🎯 专属变美方案</h4>
-                <ul id="recommendationList"></ul>
-            </div>
-            
-            <button class="restart-btn" onclick="restart()">重新测试</button>
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
-        // 眉形类型定义（纯描述，不含独立评分，评分由眉形与脸型的匹配度决定）
-        const browTypes = {
-            wild: {
-                name: "野生眉",
-                desc: "毛发根根分明，还原原生眉毛的蓬松杂乱感，自带原生氛围感。",
-                features: "毛流感强，眉毛蓬松自然，根根分明，保留原生杂乱质感",
-                matchFace: ["骨相立体的脸型"],
-                suggestion: "野生眉重在保留原生感！只需修掉明显多余的杂毛，用眉梳顺着毛流方向梳理。可用透明眉胶轻轻定型，保持蓬松但不凌乱。"
-            },
-            willow: {
-                name: "柳叶眉",
-                desc: "线条纤细弯曲，状如柳叶，古典温柔，可以柔和脸部棱角。",
-                features: "眉头较细，眉腰平滑弯曲过渡，眉尾自然收尖，整体线条如柳叶般流畅",
-                matchFace: ["鹅蛋脸", "瓜子脸"],
-                suggestion: "柳叶眉需要精细修整保持弧度！用眉笔沿眉毛生长方向轻描，眉尾自然收尖。日常可用细头眉笔勾勒眉尾弧度。"
-            },
-            flat: {
-                name: "平眉",
-                desc: "线条平直硬朗，弱化脸部纵向比例，能够拉宽脸型，自带干练气场。",
-                features: "眉头到眉尾基本水平，没有明显眉峰，整体线条平直",
-                matchFace: ["长脸"],
-                suggestion: "平眉画法：眉头轻描，中段均匀填充，眉尾不超过眼尾延长线。上下边缘保持平行，用眉粉比眉笔更自然。"
-            },
-            drooping: {
-                name: "落尾眉",
-                desc: "眉头高挑，眉尾自然下落，自带无辜感，可以柔和尖锐的脸部线条。",
-                features: "眉头位置略高，眉尾走势自然向下，形成温柔的弧线",
-                matchFace: ["菱形脸"],
-                suggestion: "落尾眉注意眉尾不要落得太低，最低点不低于眉头。画眉时先确定眉尾落点，再从眉头往后自然过渡。"
-            },
-            sword: {
-                name: "剑眉",
-                desc: "眉形如剑，从眉头到眉尾逐渐上扬，线条锋利有力，英气十足。",
-                features: "眉头粗壮，向眉尾逐渐变细上扬，眉峰靠后且角度锐利",
-                matchFace: ["方脸", "国字脸"],
-                suggestion: "剑眉天生自带气场！修眉时保持上扬走势和锋利线条。眉头用眉粉自然晕开，眉尾用眉笔利落收尖。"
-            },
-            arched: {
-                name: "弯月眉",
-                desc: "眉形有明显的弧度，眉峰柔和上扬，如弯月般优雅，是最百搭的眉形之一。",
-                features: "眉峰位于眉毛2/3处，弧度自然圆润，眉尾微微下收",
-                matchFace: ["方脸", "圆脸", "各种脸型"],
-                suggestion: "弯月眉是百搭眉形！修眉时注意保持弧度对称，眉峰不要过于尖锐，眉峰到眉尾的过渡要自然平滑。"
-            },
-            peaked: {
-                name: "挑眉",
-                desc: "眉峰高挑明显，转折角度大，给人凌厉精明的感觉，适合打造强气场妆容。",
-                features: "眉峰角度大且位置偏高，眉尾下落明显，整体呈折线形",
-                matchFace: ["圆脸", "短脸"],
-                suggestion: "挑眉自带气场！想日常柔和些可用眉粉填充眉峰下方三角区域。想更凌厉就用眉笔加强眉峰角度。"
+        // ==================== 粒子背景 ====================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function createParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 15000);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    r: Math.random() * 2 + 0.5,
+                    color: `hsla(${260 + Math.random() * 60}, 70%, 70%, ${0.15 + Math.random() * 0.25})`
+                });
             }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            });
+
+            // 连线
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(167, 139, 250, ${0.06 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawParticles);
+        }
+
+        resizeCanvas();
+        createParticles();
+        drawParticles();
+        window.addEventListener('resize', () => { resizeCanvas(); createParticles(); });
+
+        // ==================== 数据定义 ====================
+        const browTypes = {
+            wild: { name: "野生眉", desc: "毛发根根分明，还原原生眉毛的蓬松杂乱感，自带原生氛围感。", features: "毛流感强，眉毛蓬松自然，根根分明", matchFace: ["骨相立体的脸型"], suggestion: "野生眉重在保留原生感！只需修掉多余杂毛，用眉梳顺着毛流梳理，透明眉胶定型。" },
+            willow: { name: "柳叶眉", desc: "线条纤细弯曲如柳叶，古典温柔，可柔和脸部棱角。", features: "眉头较细，弧度平滑，眉尾自然收尖", matchFace: ["鹅蛋脸", "瓜子脸"], suggestion: "用眉笔沿生长方向轻描，细头眉笔勾勒眉尾弧度，保持弧线流畅。" },
+            flat: { name: "平眉", desc: "线条平直硬朗，弱化纵向比例，自带干练气场。", features: "眉头到眉尾水平，无明显眉峰", matchFace: ["长脸"], suggestion: "眉头轻描，中段均匀填充，上下边缘平行，用眉粉更自然。" },
+            drooping: { name: "落尾眉", desc: "眉头高挑，眉尾自然下落，自带无辜感。", features: "眉头位置略高，眉尾走势向下", matchFace: ["菱形脸"], suggestion: "眉尾最低点不低于眉头，从眉头往后自然过渡。" },
+            sword: { name: "剑眉", desc: "眉形如剑，逐渐上扬，线条锋利有力，英气十足。", features: "眉头粗壮，眉尾上扬变细，眉峰锐利", matchFace: ["方脸", "国字脸"], suggestion: "保持上扬走势，眉头用眉粉自然晕开，眉尾利落收尖。" },
+            arched: { name: "弯月眉", desc: "弧度如弯月般优雅，最百搭的眉形之一。", features: "眉峰位于2/3处，弧度圆润，眉尾微下收", matchFace: ["方脸", "圆脸", "各种脸型"], suggestion: "保持弧度对称，眉峰不要过尖，眉峰到眉尾平滑过渡。" },
+            peaked: { name: "挑眉", desc: "眉峰高挑明显，凌厉精明，适合强气场妆容。", features: "眉峰角度大位置高，眉尾下落明显", matchFace: ["圆脸", "短脸"], suggestion: "日常可用眉粉填充眉峰下方三角区域柔化，想凌厉就加强眉峰。" }
         };
-        
-        // 眉形-脸型匹配评分表（眉形与脸型的和谐度决定分数）
+
         const browFaceMatch = {
-            // 直面型 - 标准脸型，大部分眉形都适合
             '直面型': { '柳叶眉': 92, '弯月眉': 93, '野生眉': 88, '平眉': 85, '剑眉': 90, '落尾眉': 86, '挑眉': 87 },
-            // 微凸面型 - 东亚美人，柔和的眉形更合适
             '微凸面型': { '柳叶眉': 93, '弯月眉': 91, '野生眉': 85, '平眉': 82, '剑眉': 80, '落尾眉': 88, '挑眉': 83 },
-            // 丰润型面型 - 脸部线条柔和外扩，需要有弧度的眉形平衡
             '丰润型面型': { '柳叶眉': 90, '弯月眉': 92, '野生眉': 80, '平眉': 75, '剑眉': 82, '落尾眉': 78, '挑眉': 88 },
-            // 微凹面型 - 线条内收，需要增加面部存在感的眉形
             '微凹面型': { '柳叶眉': 85, '弯月眉': 88, '野生眉': 90, '平眉': 86, '剑眉': 87, '落尾眉': 82, '挑眉': 84 },
-            // 柔和型面型 - 轮廓温婉，搭配柔和或有存在感的眉形
             '柔和型面型': { '柳叶眉': 86, '弯月眉': 89, '野生眉': 91, '平眉': 84, '剑眉': 85, '落尾眉': 83, '挑眉': 82 },
-            // 立体型面型 - 面部起伏明显，需要有力度的眉形
             '立体型面型': { '柳叶眉': 78, '弯月眉': 83, '野生眉': 93, '平眉': 76, '剑眉': 92, '落尾眉': 80, '挑眉': 88 }
         };
-        
-        // 脸型类型定义
-        const faceTypes = {
-            straight: {
-                name: "直面型",
-                score: 95,
-                desc: "眉心—鼻尖—颏前点（E线）基本成直线，上下唇位置协调。这是颌面美学的标准模板，侧面线条流畅自然。",
-                features: "下唇略贴E线，上唇微后收0.5-1mm",
-                suggestion: "你的脸型非常标准，保持现状即可。可以尝试各种发型和妆容风格。"
+
+        // 唇形类型定义
+        const lipTypes = {
+            mPetal: {
+                name: "M唇/花瓣唇",
+                desc: "唇峰明显呈M形，上唇像花瓣一样有弧度，精致甜美。这是公认的'教科书级'唇形，M形唇峰让上唇如雕刻般精致，两峰之间形成优美的唇弓凹陷。上唇的花瓣弧度配合饱满下唇，不笑时就有一种甜美端庄感，微微张嘴更显精致。很多人做唇部整形追求的就是这种天然M形弧线。",
+                features: "唇峰M形弧度明显，上唇如花瓣般精致有弧度，唇弓线条清晰对称，唇珠自然凸起于两峰之间，下唇圆润饱满",
+                ratio: "上下唇厚度约 1:1.3，上唇弧度感强",
+                aura: "精致甜美、高定妆感、天然教科书唇形",
+                celebRef: "迪丽热巴、刘亦菲、Angelababy同款唇形",
+                matchFace: ["标准脸型", "鹅蛋脸", "立体脸型"],
+                colorRec: "正红色、玫瑰红最能展现唇峰轮廓；日常选豆沙色、蜜桃色也很甜美",
+                suggestion: "M唇/花瓣唇是天生的精致唇形！画唇妆时沿天然唇峰精准描绘，不需模糊唇线。哑光质地最能突显唇峰M形轮廓，水光质地则更强调花瓣般的甜美感。唇中央可叠涂浅色增加立体度。"
             },
-            slightlyConvex: {
-                name: "微凸面型",
-                score: 88,
-                desc: "嘴唇轻微超出E线，但不突兀。面中柔和前展，无明显下巴后缩或龅牙感。",
-                features: "东亚美人常见，自带娇俏明艳感",
-                suggestion: "微凸面型很有东方美感。避免过于厚重的刘海，侧分或中分更能展现你的气质。"
+            smile: {
+                name: "微笑唇",
+                desc: "嘴角自然微微上扬，不笑也像在笑，亲和力强。微笑唇让整张脸永远带着温暖的表情，给人天生乐观开朗的印象。即使放松状态下嘴角也有2-3mm的自然上翘，这种'天然微笑'让你在人群中格外讨喜。笑起来弧度更大感染力十足，是社交场合的天然加分项。",
+                features: "嘴角天然上翘约2-3mm，唇线末端自然上扬，唇弓弧度柔和舒展，上唇略呈弓形，嘴角处有自然上提弧线",
+                ratio: "上下唇厚度约 1:1.3，嘴角区域唇线上扬",
+                aura: "亲和力满分、天生好人缘、甜美阳光",
+                celebRef: "林允儿、IU、石原里美同款唇形",
+                matchFace: ["各种脸型", "尤其适合圆脸和甜美风"],
+                colorRec: "蜜桃色、西柚色、元气橘色等活力暖色系",
+                suggestion: "微笑唇是天生的好人缘唇形！唇妆以自然为主，薄涂水光唇釉就很好看。不需强调唇线，模糊边界的'咬唇妆'和你最配。嘴角偶尔下垂时可用遮瑕提亮嘴角，搭配苹果肌腮红甜美值拉满。"
             },
-            convex: {
-                name: "丰润型面型",
-                score: 75,
-                desc: "嘴唇饱满前展，面部线条柔和外扩，给人亲和温暖的感觉。这是很有东方特色的面型。",
-                features: "亲和力强，有辨识度，适合暖风格",
-                suggestion: "你的面型很有亲和力！妆容上可以用深色唇妆增加精致感，高光打在下巴和鼻梁拉长线条。发型选择侧分或八字刘海，露出额头会更显气质。"
+            cherry: {
+                name: "樱桃唇",
+                desc: "唇形小巧饱满，上下唇都偏圆润，可爱减龄。嘴巴整体面积偏小但轮廓圆润饱满像一颗成熟的樱桃，唇珠圆润突出，唇峰弧度柔和不尖锐，天然带着楚楚可人的精致感。不涂口红时唇色也偏红润，笑起来唇部弧度甜美，自带可爱减龄buff。",
+                features: "唇形偏小但饱满圆润，上下唇比例均匀，唇珠圆润明显，唇峰弧度柔和，整体呈小巧圆润形态",
+                ratio: "上下唇厚度约 1:1.2，整体偏小巧饱满",
+                aura: "可爱减龄、精致甜美、少女感十足",
+                celebRef: "赵露思、周也同款唇形",
+                matchFace: ["鹅蛋脸", "瓜子脸", "小巧精致脸型"],
+                colorRec: "水红色、草莓色、蜜桃色等清透亮色系",
+                suggestion: "樱桃唇天生精致可爱！用唇釉打造水光果冻质感最佳。唇线保持自然模糊，唇珠处点涂高光或浅色唇蜜增加立体感。避免深色哑光唇膏会显嘴小且老气，想放大唇形可在唇中央叠涂提亮。"
             },
-            slightlyConcave: {
-                name: "微凹面型",
-                score: 82,
-                desc: "嘴唇轻微落在E线内侧，上颌略后缩，鼻基底偏平，线条内收柔和。",
-                features: "可能伴随轻微法令纹，气质温婉",
-                suggestion: "适合饱满唇妆增加立体感，腮红打在苹果肌提升气色。避免过于 flat 的妆容。"
+            oval: {
+                name: "鹅蛋唇/椭圆唇",
+                desc: "唇峰不尖锐，整体偏椭圆，线条柔和，温柔耐看。没有过于明显的棱角和转折，上下唇线条都呈柔和的椭圆弧线，给人温润如玉的感觉。这种唇形非常耐看，远看温柔大方近看细节舒服。因为线条没有攻击性，百搭各种妆容风格，是化妆师最喜欢的'画布型'唇形。",
+                features: "唇峰圆润不尖锐，整体呈柔和椭圆形，上下唇弧度平滑过渡，唇线柔和无明显转折，嘴角收束自然",
+                ratio: "上下唇厚度约 1:1.2，整体线条圆润均匀",
+                aura: "温柔耐看、知性大方、百搭万能",
+                celebRef: "宋慧乔、刘诗诗、汤唯同款唇形",
+                matchFace: ["各种脸型", "尤其适合柔和面型和鹅蛋脸"],
+                colorRec: "豆沙色、玫瑰色、奶茶色等温柔色系；也能驾驭姨妈红等气场色",
+                suggestion: "鹅蛋唇是最百搭的唇形！任何唇色和质地都能驾驭。日常温柔路线选豆沙色/奶茶色，气场路线选正红色/梅子色。顺着天然唇线画即可，不需刻意改变唇形，你的唇形本身已经很完美。"
             },
-            concave: {
-                name: "柔和型面型",
-                score: 72,
-                desc: "面部线条内收柔和，轮廓温婉，给人安静内敛的感觉。这种面型很有书卷气。",
-                features: "气质温婉，适合文艺清新风格",
-                suggestion: "你的面型很有气质！妆容重点：用高光增加面中饱满度，选择饱满唇色增加立体感。发型可以用蓬松的卷发或空气刘海增加柔和感。"
+            thick: {
+                name: "厚唇/欧美唇",
+                desc: "上下唇都饱满，存在感强，性感大气。厚唇在国际审美中是高级感和性感的象征，饱满唇部让整张脸更有张力和表现力。自带一种慵懒又强势的气场，不涂口红就已经很有存在感。微微嘟起时性感指数爆表，大笑时又有豪爽的感染力。很多国际超模和好莱坞女星都是这种唇形。",
+                features: "上下唇均饱满厚实，唇部面积较大，唇线圆润明显，唇珠不突出但整体丰盈感强，嘴角线条大气",
+                ratio: "上下唇厚度约 1:1.2，整体偏厚丰满",
+                aura: "性感大气、国际超模感、高辨识度",
+                celebRef: "舒淇、安吉丽娜·朱莉、倪妮同款唇形",
+                matchFace: ["大气脸型", "立体脸型", "轮廓感强的脸型"],
+                colorRec: "日常选裸粉色、肉桂色、脏橘色弱化存在感；想高调选正红色、酒红色",
+                suggestion: "厚唇/欧美唇天生高级性感！日常想低调可选哑光质地+低饱和色系降低膨胀感，用遮瑕轻拍唇外缘缩小轮廓。想走性感路线就大胆用正红色或酒红色，你的唇形撑得住任何浓烈色彩。"
             },
-            fengjie: {
-                name: "立体型面型",
-                score: 70,
-                desc: "面部起伏明显，五官存在感强，是很有记忆点的面型。",
-                features: "辨识度高，适合打造个人风格",
-                suggestion: "你的面型很有特点！建议：侧分长发修饰轮廓，妆容强调眉眼转移视觉焦点。拍照时微微低头，找到最佳角度。自信是最好的妆容！"
+            thin: {
+                name: "薄唇",
+                desc: "唇瓣偏薄，唇线清晰，清冷、高级、有气质。薄唇自带克制与禁欲感，线条利落干净给人精明干练的印象。不需过多修饰就很有'高冷系'气质，配合坚定的眼神有一种不动声色的强大气场。在东亚审美中，薄唇代表理性与高级感，是很多'天花板'级美女的标配。",
+                features: "唇部面积偏小，上下唇均偏薄，唇线清晰利落，唇峰平缓，嘴角线条干净，整体呈精致扁平弧线",
+                ratio: "上下唇厚度约 1:1，整体偏薄",
+                aura: "清冷高级、禁欲气质、干练知性",
+                celebRef: "刘雯、章子怡、周冬雨同款唇形",
+                matchFace: ["精致小脸", "骨感脸型", "高级感脸型"],
+                colorRec: "饱满亮色系如水红色、珊瑚色、浆果色增加唇部存在感",
+                suggestion: "薄唇自带高级利落感！想增加饱满度：用唇线笔沿唇外缘0.5mm轻描轮廓，选水光/镜面质地唇釉增加丰盈视觉。唇珠处重点叠涂浅色，'中央深两边浅'的渐变画法效果最好。睡前厚涂唇膜养出水润薄唇更高级。"
+            },
+            pouty: {
+                name: "嘟嘟唇",
+                desc: "下唇饱满圆润，唇珠明显，幼态、显嫩。嘟嘟唇让整张脸充满胶原蛋白的青春感，是'幼态脸'的标配唇形。下唇的饱满圆润搭配突出的唇珠，天然带有无辜又可爱的嘟嘟感。不经意嘟嘴时特别可爱，笑起来嘴唇的圆润弧度更是减龄利器，是满满胶原蛋白的象征。",
+                features: "下唇饱满圆润外翻，唇珠突出明显，唇部整体有嘟起的立体感，上唇适中或略薄，下唇存在感强",
+                ratio: "上下唇厚度约 1:1.5，下唇明显饱满于上唇",
+                aura: "幼态显嫩、无辜可爱、天然减龄",
+                celebRef: "鞠婧祎、周洁琼、虞书欣同款唇形",
+                matchFace: ["幼态脸", "圆脸", "甜美可爱脸型"],
+                colorRec: "水蜜桃色、粉红色、奶油草莓色等甜美色系",
+                suggestion: "嘟嘟唇天生减龄可爱！用水光唇釉打造果冻质感最佳。下唇中央叠涂浅色增加嘟嘟立体感，唇线不用画太清晰，保持自然模糊边界感。搭配腮红和卧蚕妆可爱值翻倍。上唇可用唇线笔稍微扩大让上下更均衡。"
+            },
+            flat: {
+                name: "平直唇",
+                desc: "唇峰不突出，嘴角平直，干净利落，偏中性高级感。平直唇的唇峰几乎没有明显M形弧度，上唇线条接近水平，整体唇形方正干净。自带一种'去性别化'的高级感，既不甜美也不性感，而是超越常规审美的独特气质。在高级时装和前卫妆容中，平直唇是最受青睐的唇形之一。",
+                features: "唇峰平缓不突出，上唇线条接近水平，嘴角平直不上翘不下垂，整体唇形方正干净，唇线利落",
+                ratio: "上下唇厚度约 1:1.1，上唇线条平直",
+                aura: "中性高级、干净利落、前卫时尚",
+                celebRef: "杜鹃、刘雯、吕燕同款唇形",
+                matchFace: ["方脸", "长脸", "骨感脸型", "高级感脸型"],
+                colorRec: "裸色系、肉桂色、脏橘色强化高级感；想出挑选正红色或深梅子色",
+                suggestion: "平直唇自带中性高级感！画唇妆时保持上唇平直线条，不要刻意画出唇峰。哑光质地最配这种利落感，唇色选低饱和裸色系或大地色系最高级。想制造唇峰可在上唇中央微微画出弧度，但保留原生平直感其实更有辨识度。"
             }
         };
-        
-        // 上传区域点击
-        document.getElementById('uploadSection').addEventListener('click', () => {
+
+        // 唇形-脸型匹配评分表
+        const lipFaceMatch = {
+            '直面型': { 'M唇/花瓣唇': 95, '微笑唇': 92, '樱桃唇': 90, '鹅蛋唇/椭圆唇': 93, '厚唇/欧美唇': 88, '薄唇': 91, '嘟嘟唇': 87, '平直唇': 89 },
+            '微凸面型': { 'M唇/花瓣唇': 91, '微笑唇': 89, '樱桃唇': 88, '鹅蛋唇/椭圆唇': 90, '厚唇/欧美唇': 82, '薄唇': 93, '嘟嘟唇': 85, '平直唇': 86 },
+            '丰润型面型': { 'M唇/花瓣唇': 83, '微笑唇': 86, '樱桃唇': 85, '鹅蛋唇/椭圆唇': 87, '厚唇/欧美唇': 78, '薄唇': 92, '嘟嘟唇': 80, '平直唇': 84 },
+            '微凹面型': { 'M唇/花瓣唇': 88, '微笑唇': 89, '樱桃唇': 86, '鹅蛋唇/椭圆唇': 91, '厚唇/欧美唇': 90, '薄唇': 80, '嘟嘟唇': 92, '平直唇': 83 },
+            '柔和型面型': { 'M唇/花瓣唇': 85, '微笑唇': 87, '樱桃唇': 84, '鹅蛋唇/椭圆唇': 93, '厚唇/欧美唇': 91, '薄唇': 79, '嘟嘟唇': 93, '平直唇': 81 },
+            '立体型面型': { 'M唇/花瓣唇': 90, '微笑唇': 84, '樱桃唇': 82, '鹅蛋唇/椭圆唇': 85, '厚唇/欧美唇': 93, '薄唇': 83, '嘟嘟唇': 86, '平直唇': 91 }
+        };
+
+        const faceTypes = {
+            straight: { name: "直面型", score: 95, desc: "E线基本成直线，上下唇位置协调。颌面美学标准模板，侧面线条流畅自然。", features: "下唇略贴E线，上唇微后收0.5-1mm", suggestion: "你的脸型非常标准，保持现状即可。可以尝试各种发型和妆容风格。" },
+            slightlyConvex: { name: "微凸面型", score: 88, desc: "嘴唇轻微超出E线但不突兀，面中柔和前展，自带娇俏明艳感。", features: "东亚美人常见，自带娇俏明艳感", suggestion: "避免过于厚重的刘海，侧分或中分更能展现气质。" },
+            convex: { name: "丰润型面型", score: 75, desc: "嘴唇饱满前展，面部线条柔和外扩，给人亲和温暖的感觉。", features: "亲和力强，有辨识度，适合暖风格", suggestion: "深色唇妆增加精致感，高光打在下巴和鼻梁拉长线条，八字刘海更显气质。" },
+            slightlyConcave: { name: "微凹面型", score: 82, desc: "嘴唇轻微落在E线内侧，上颌略后缩，线条内收柔和。", features: "可能伴随轻微法令纹，气质温婉", suggestion: "饱满唇妆增加立体感，腮红打在苹果肌提升气色。" },
+            concave: { name: "柔和型面型", score: 72, desc: "面部线条内收柔和，轮廓温婉，给人安静内敛的感觉。", features: "气质温婉，适合文艺清新风格", suggestion: "高光增加面中饱满度，选择饱满唇色，蓬松卷发或空气刘海增加柔和感。" },
+            fengjie: { name: "立体型面型", score: 70, desc: "面部起伏明显，五官存在感强，是很有记忆点的面型。", features: "辨识度高，适合打造个人风格", suggestion: "侧分长发修饰轮廓，妆容强调眉眼转移视觉焦点。自信是最好的妆容！" }
+        };
+
+        // 明星对标库
+        const celebMatches = {
+            '直面型': { high: ["刘亦菲", "高圆圆", "李沁"], mid: ["张钧甯", "谭松韵"] },
+            '微凸面型': { high: ["迪丽热巴", "杨幂", "赵丽颖"], mid: ["杨紫", "关晓彤"] },
+            '丰润型面型': { high: ["蒋欣", "贾玲", "辣目洋子"], mid: ["马思纯", "张雨绑"] },
+            '微凹面型': { high: ["倪妮", "章子怡", "周冬雨"], mid: ["春夏", "文淇"] },
+            '柔和型面型': { high: ["刘诗诗", "郑爽", "江疏影"], mid: ["宋茜", "古力娜扎"] },
+            '立体型面型': { high: ["吕燕", "杜鹃", "刘雯"], mid: ["孙菲菲", "何穗"] }
+        };
+
+        // ==================== 标签页切换 ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-item').forEach((t, i) => {
+                t.classList.toggle('active', (tab === 'main' && i === 0) || (tab === 'history' && i === 1));
+            });
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + (tab === 'main' ? 'main' : 'history')).classList.add('active');
+            if (tab === 'history') renderHistory();
+        }
+
+        // ==================== 上传处理 ====================
+        const uploadSection = document.getElementById('uploadSection');
+
+        uploadSection.addEventListener('click', (e) => {
+            if (e.target.closest('.upload-btn')) return;
             document.getElementById('fileInput').click();
         });
-        
-        // 文件选择
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
+
+        document.getElementById('fileInput').addEventListener('change', e => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
         });
-        
-        // 拖拽上传
-        document.getElementById('uploadSection').addEventListener('dragover', (e) => {
+
+        document.getElementById('cameraInput').addEventListener('change', e => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        uploadSection.addEventListener('dragover', e => {
             e.preventDefault();
-            e.currentTarget.style.borderColor = '#667eea';
-            e.currentTarget.style.background = '#f8f9ff';
+            uploadSection.classList.add('drag-over');
         });
-        
-        document.getElementById('uploadSection').addEventListener('dragleave', (e) => {
-            e.currentTarget.style.borderColor = '#ddd';
-            e.currentTarget.style.background = 'white';
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('drag-over');
         });
-        
-        document.getElementById('uploadSection').addEventListener('drop', (e) => {
+
+        uploadSection.addEventListener('drop', e => {
             e.preventDefault();
-            e.currentTarget.style.borderColor = '#ddd';
-            e.currentTarget.style.background = 'white';
-            
+            uploadSection.classList.remove('drag-over');
             const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleFile(file);
-            }
+            if (file && file.type.startsWith('image/')) handleFile(file);
         });
-        
+
+        let currentImageData = null;
+
         function handleFile(file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('previewImage').src = e.target.result;
-                document.getElementById('uploadSection').style.display = 'none';
+            reader.onload = e => {
+                currentImageData = e.target.result;
+                document.getElementById('previewImage').src = currentImageData;
+                uploadSection.style.display = 'none';
                 document.getElementById('previewSection').classList.add('active');
             };
             reader.readAsDataURL(file);
         }
-        
+
+        // ==================== 分析过程 ====================
         function startAnalysis() {
             document.getElementById('previewSection').classList.remove('active');
             document.getElementById('loadingSection').classList.add('active');
-            
-            // 模拟分析过程
-            setTimeout(() => {
-                generateResult();
-            }, 3000);
+
+            const steps = [
+                { id: 'step1', text: '正在检测人脸区域...', percent: 20, duration: 800 },
+                { id: 'step2', text: '正在定位五官关键点...', percent: 45, duration: 900 },
+                { id: 'step3', text: '正在识别脸型与眉形...', percent: 70, duration: 1000 },
+                { id: 'step4', text: '正在综合评估生成报告...', percent: 100, duration: 800 }
+            ];
+
+            let i = 0;
+            function nextStep() {
+                if (i > 0) document.getElementById(steps[i - 1].id).classList.remove('current');
+                if (i > 0) document.getElementById(steps[i - 1].id).classList.add('done');
+                if (i >= steps.length) {
+                    setTimeout(generateResult, 400);
+                    return;
+                }
+                const step = steps[i];
+                document.getElementById(step.id).classList.add('current');
+                document.getElementById('loadingStep').textContent = step.text;
+                document.getElementById('loadPercent').textContent = step.percent + '%';
+                const circle = document.getElementById('loadProgress');
+                circle.style.strokeDashoffset = 226 - (226 * step.percent / 100);
+                i++;
+                setTimeout(nextStep, step.duration);
+            }
+            nextStep();
         }
-        
+
+        // ==================== 生成结果 ====================
+        let lastResult = null;
+
         function generateResult() {
-            // 随机生成结果（实际应用中这里应该是真实的AI分析）
             const faceTypeKeys = Object.keys(faceTypes);
             const randomFaceType = faceTypes[faceTypeKeys[Math.floor(Math.random() * faceTypeKeys.length)]];
-            
-            const totalScore = randomFaceType.score + Math.floor(Math.random() * 10 - 5);
-            
-            // 随机选取眉形
+            const baseScore = randomFaceType.score + Math.floor(Math.random() * 10 - 5);
+            const totalScore = Math.max(60, Math.min(99, baseScore));
+
             const browTypeKeys = Object.keys(browTypes);
             const randomBrowType = browTypes[browTypeKeys[Math.floor(Math.random() * browTypeKeys.length)]];
-            
-            // 根据眉形与脸型的匹配度计算眉形协调度评分
+
             const matchTable = browFaceMatch[randomFaceType.name] || {};
             const browMatchScore = matchTable[randomBrowType.name] || (Math.floor(Math.random() * 15 + 75));
             const browHarmonyScore = Math.min(99, Math.max(60, browMatchScore + Math.floor(Math.random() * 6 - 3)));
-            
-            // 五官详细评分
+
+            // 随机选取唇形
+            const lipTypeKeys = Object.keys(lipTypes);
+            const randomLipType = lipTypes[lipTypeKeys[Math.floor(Math.random() * lipTypeKeys.length)]];
+
+            // 唇形-脸型匹配度
+            const lipMatchTable = lipFaceMatch[randomFaceType.name] || {};
+            const lipMatchScore = lipMatchTable[randomLipType.name] || (Math.floor(Math.random() * 15 + 75));
+            const lipHarmonyScore = Math.min(99, Math.max(60, lipMatchScore + Math.floor(Math.random() * 6 - 3)));
+
+            // 基于总分生成相关联的分项评分
+            const baseOffset = totalScore - 80;
             const featureScores = {
-                '三庭比例': Math.floor(Math.random() * 20 + 75),
-                '五眼分布': Math.floor(Math.random() * 20 + 75),
-                '眼睛形态': Math.floor(Math.random() * 25 + 70),
-                '眉脸协调度': browHarmonyScore,
-                '鼻子立体度': Math.floor(Math.random() * 25 + 70),
-                '唇形饱满度': Math.floor(Math.random() * 25 + 70),
-                '下颌线条': Math.floor(Math.random() * 25 + 70)
+                '三庭比例': clamp(80 + baseOffset + rand(-5, 5)),
+                '五眼分布': clamp(79 + baseOffset + rand(-6, 6)),
+                '眼睛形态': clamp(78 + baseOffset + rand(-7, 7)),
+                '眉脸协调': browHarmonyScore,
+                '唇脸协调': lipHarmonyScore,
+                '鼻子立体': clamp(77 + baseOffset + rand(-6, 6)),
+                '唇形饱满': clamp(78 + baseOffset + rand(-5, 5)),
+                '下颌线条': clamp(79 + baseOffset + rand(-6, 6))
             };
-            
-            // 显示总分
-            document.getElementById('totalScore').textContent = totalScore;
+
+            lastResult = { faceType: randomFaceType, browType: randomBrowType, lipType: randomLipType, totalScore, featureScores, browHarmonyScore, lipHarmonyScore };
+
+            // -- 显示总分（计数动画）
+            animateScore(0, totalScore, 1200);
             document.getElementById('scoreDesc').textContent = getScoreDesc(totalScore);
-            
-            // 显示脸型分析
+            document.getElementById('scoreStars').textContent = getStars(totalScore);
+
+            // -- 明星对标
+            const celebs = celebMatches[randomFaceType.name] || celebMatches['直面型'];
+            const picks = totalScore >= 85 ? celebs.high : celebs.mid;
+            document.getElementById('celebList').innerHTML = picks.map(c => `<span class="celeb-tag">${c}</span>`).join('');
+
+            // -- 脸型分析
             document.getElementById('faceTypeResult').innerHTML = `
-                <strong style="color: #e65100; font-size: 18px;">${randomFaceType.name}</strong><br><br>
+                <strong style="color: #fb923c; font-size: 17px;">${randomFaceType.name}</strong><br><br>
                 ${randomFaceType.desc}<br><br>
                 <strong>特征：</strong>${randomFaceType.features}
             `;
-            
-            // 显示五官特征
+
+            // -- 五官特征
             const eyeSize = featureScores['眼睛形态'] > 85 ? '大而有神' : featureScores['眼睛形态'] > 75 ? '适中' : '偏小';
             const eyeSpacing = featureScores['五眼分布'] > 85 ? '标准' : '略宽';
-            const noseScore = featureScores['鼻子立体度'] > 85 ? '立体挺拔' : featureScores['鼻子立体度'] > 75 ? '适中' : '偏扁平';
-            
+            const noseDesc = featureScores['鼻子立体'] > 85 ? '立体挺拔' : featureScores['鼻子立体'] > 75 ? '适中' : '偏扁平';
             document.getElementById('featuresResult').innerHTML = `
-                <strong>眉形：</strong>${randomBrowType.name}（${randomBrowType.features}）<br>
+                <strong>眉形：</strong>${randomBrowType.name}<br>
+                <strong>唇形：</strong>${randomLipType.name}（${randomLipType.ratio}）<br>
                 <strong>眼睛：</strong>${eyeSize}，眼距${eyeSpacing}<br>
-                <strong>鼻子：</strong>${noseScore}<br>
-                <strong>嘴唇：</strong>${randomFaceType.name.includes('凸') ? '偏前突' : randomFaceType.name.includes('凹') ? '偏内收' : '位置适中'}<br>
+                <strong>鼻子：</strong>${noseDesc}<br>
                 <strong>三庭：</strong>${featureScores['三庭比例'] > 80 ? '比例协调' : '略需调整'}
             `;
-            
-            // 显示建议
-            document.getElementById('suggestionsResult').innerHTML = randomFaceType.suggestion;
-            
-            // 显示眉形分析
+
+            // -- 眉形分析
             const browIsMatch = browHarmonyScore >= 88;
-            const browMatchDesc = browIsMatch 
-                ? `你的${randomBrowType.name}与${randomFaceType.name}非常和谐，眉脸搭配协调！` 
-                : `你的${randomBrowType.name}与${randomFaceType.name}搭配有优化空间，可以通过画眉技巧调整。`;
+            const browMatchDesc = browIsMatch
+                ? `你的${randomBrowType.name}与${randomFaceType.name}非常和谐！`
+                : `你的${randomBrowType.name}与${randomFaceType.name}有优化空间，可通过画眉调整。`;
             document.getElementById('browResult').innerHTML = `
-                <strong style="color: #c2185b; font-size: 18px;">${randomBrowType.name}</strong><br><br>
+                <strong style="color: #f472b6; font-size: 17px;">${randomBrowType.name}</strong><br><br>
                 ${randomBrowType.desc}<br><br>
-                <strong>特征：</strong>${randomBrowType.features}<br>
                 <strong>适配脸型：</strong>${randomBrowType.matchFace.join('、')}<br>
-                <strong>与当前脸型匹配：</strong>${browMatchDesc}<br><br>
+                <strong>匹配度：</strong>${browMatchDesc}<br><br>
                 <strong>修饰建议：</strong>${randomBrowType.suggestion}
             `;
-            
-            // 显示详细评分
-            let detailHtml = '';
-            for (const [name, score] of Object.entries(featureScores)) {
-                const color = score >= 85 ? '#4caf50' : score >= 75 ? '#ff9800' : '#f44336';
-                detailHtml += `
-                    <div class="feature-item">
-                        <span class="feature-name">${name}</span>
-                        <div class="feature-score">
-                            <div class="score-bar">
-                                <div class="score-fill" style="width: ${score}%; background: ${color};"></div>
-                            </div>
-                            <span class="score-number">${score}</span>
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('detailScores').innerHTML = detailHtml;
-            
-            // 生成推荐方案
-            const recommendations = generateRecommendations(randomFaceType, featureScores, randomBrowType);
-            document.getElementById('recommendationList').innerHTML = recommendations.map(r => `<li>${r}</li>`).join('');
-            
-            // 显示结果
+
+            // -- 唇形分析
+            const lipIsMatch = lipHarmonyScore >= 88;
+            const lipMatchDesc = lipIsMatch
+                ? `你的${randomLipType.name}与${randomFaceType.name}非常协调，唇脸比例和谐！`
+                : `你的${randomLipType.name}与${randomFaceType.name}搭配可以通过唇妆技巧进一步优化。`;
+            document.getElementById('lipResult').innerHTML = `
+                <strong style="color: #f87171; font-size: 17px;">${randomLipType.name}</strong><br><br>
+                ${randomLipType.desc}<br><br>
+                <strong>唇形特征：</strong>${randomLipType.features}<br>
+                <strong>上下唇比例：</strong>${randomLipType.ratio}<br>
+                <strong>气质印象：</strong>${randomLipType.aura}<br>
+                <strong>明星同款：</strong>${randomLipType.celebRef}<br>
+                <strong>适配脸型：</strong>${randomLipType.matchFace.join('、')}<br>
+                <strong>唇脸协调度：</strong>${lipMatchDesc}<br><br>
+                <strong>推荐唇色：</strong>${randomLipType.colorRec}<br>
+                <strong>唇妆建议：</strong>${randomLipType.suggestion}
+            `;
+
+            // -- 建议
+            document.getElementById('suggestionsResult').innerHTML = randomFaceType.suggestion;
+
+            // -- 雷达图 + 图例
+            setTimeout(() => drawRadarChart(featureScores), 300);
+            renderLegend(featureScores);
+
+            // -- 推荐方案
+            const recs = generateRecommendations(randomFaceType, featureScores, randomBrowType, randomLipType);
+            document.getElementById('recommendationList').innerHTML = recs.map(r => {
+                const icon = r.substring(0, 2);
+                const text = r.substring(3);
+                return `<li data-icon="${icon}">${text}</li>`;
+            }).join('');
+
+            // -- 切换显示
             document.getElementById('loadingSection').classList.remove('active');
             document.getElementById('resultSection').classList.add('active');
+
+            // 重置加载状态
+            resetLoadingState();
+
+            // 保存历史
+            saveHistory(randomFaceType.name, totalScore);
         }
-        
+
+        function clamp(v) { return Math.max(60, Math.min(99, Math.round(v))); }
+        function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+        function animateScore(from, to, duration) {
+            const el = document.getElementById('totalScore');
+            const start = performance.now();
+            function tick(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(from + (to - from) * eased);
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
+
         function getScoreDesc(score) {
-            if (score >= 90) return "你的美很有辨识度，让人过目难忘 ✨";
-            if (score >= 80) return "你有着独特的气质，越来越耐看 🌟";
-            if (score >= 70) return "你有自己的闪光点，找到适合的风格会更出彩 💫";
-            return "每个人都是潜力股，找到适合自己的方式就能发光 🌱";
+            if (score >= 90) return "你的美很有辨识度，让人过目难忘";
+            if (score >= 80) return "你有着独特的气质，越来越耐看";
+            if (score >= 70) return "你有自己的闪光点，找到风格会更出彩";
+            return "每个人都是潜力股，找到适合的方式就能发光";
         }
-        
-        function generateRecommendations(faceType, scores, browType) {
+
+        function getStars(score) {
+            const full = Math.floor(score / 20);
+            const half = score % 20 >= 10 ? 1 : 0;
+            return '★'.repeat(full) + (half ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - full - half));
+        }
+
+        function resetLoadingState() {
+            ['step1', 'step2', 'step3', 'step4'].forEach(id => {
+                document.getElementById(id).classList.remove('done', 'current');
+            });
+            document.getElementById('loadProgress').style.strokeDashoffset = 226;
+            document.getElementById('loadPercent').textContent = '0%';
+        }
+
+        // ==================== 雷达图 ====================
+        function drawRadarChart(scores) {
+            const cv = document.getElementById('radarChart');
+            const c = cv.getContext('2d');
+            const W = cv.width, H = cv.height;
+            const cx = W / 2, cy = H / 2, R = 110;
+            c.clearRect(0, 0, W, H);
+
+            const labels = Object.keys(scores);
+            const values = Object.values(scores);
+            const n = labels.length;
+            const step = (Math.PI * 2) / n;
+
+            // 背景网格
+            for (let ring = 1; ring <= 5; ring++) {
+                const r = R * ring / 5;
+                c.beginPath();
+                for (let i = 0; i <= n; i++) {
+                    const angle = -Math.PI / 2 + step * i;
+                    const x = cx + r * Math.cos(angle);
+                    const y = cy + r * Math.sin(angle);
+                    i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+                }
+                c.closePath();
+                c.strokeStyle = `rgba(255,255,255,${ring === 5 ? 0.12 : 0.05})`;
+                c.lineWidth = 1;
+                c.stroke();
+            }
+
+            // 辐射线
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                c.beginPath();
+                c.moveTo(cx, cy);
+                c.lineTo(cx + R * Math.cos(angle), cy + R * Math.sin(angle));
+                c.strokeStyle = 'rgba(255,255,255,0.06)';
+                c.stroke();
+            }
+
+            // 数据区域
+            const grad = c.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+            grad.addColorStop(0, 'rgba(167, 139, 250, 0.35)');
+            grad.addColorStop(1, 'rgba(244, 114, 182, 0.35)');
+
+            c.beginPath();
+            for (let i = 0; i <= n; i++) {
+                const idx = i % n;
+                const angle = -Math.PI / 2 + step * idx;
+                const val = values[idx] / 100;
+                const x = cx + R * val * Math.cos(angle);
+                const y = cy + R * val * Math.sin(angle);
+                i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+            }
+            c.closePath();
+            c.fillStyle = grad;
+            c.fill();
+            c.strokeStyle = 'rgba(167, 139, 250, 0.8)';
+            c.lineWidth = 2;
+            c.stroke();
+
+            // 数据点
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                const val = values[i] / 100;
+                const x = cx + R * val * Math.cos(angle);
+                const y = cy + R * val * Math.sin(angle);
+                c.beginPath();
+                c.arc(x, y, 4, 0, Math.PI * 2);
+                c.fillStyle = '#c4b5fd';
+                c.fill();
+                c.strokeStyle = 'white';
+                c.lineWidth = 1.5;
+                c.stroke();
+            }
+
+            // 标签
+            c.font = '12px -apple-system, sans-serif';
+            c.fillStyle = 'rgba(255,255,255,0.6)';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                const x = cx + (R + 24) * Math.cos(angle);
+                const y = cy + (R + 24) * Math.sin(angle);
+                c.fillText(labels[i], x, y);
+            }
+        }
+
+        function renderLegend(scores) {
+            const colors = ['#a78bfa', '#f472b6', '#fb923c', '#4ade80', '#f87171', '#60a5fa', '#f9a8d4', '#fbbf24'];
+            let html = '';
+            let i = 0;
+            for (const [name, score] of Object.entries(scores)) {
+                html += `
+                    <div class="legend-item">
+                        <span class="legend-label">${name}</span>
+                        <div class="legend-bar-wrap">
+                            <div class="legend-bar" style="background: ${colors[i % colors.length]};" data-width="${score}%"></div>
+                        </div>
+                        <span class="legend-value">${score}</span>
+                    </div>`;
+                i++;
+            }
+            document.getElementById('radarLegend').innerHTML = html;
+
+            // 动画触发
+            setTimeout(() => {
+                document.querySelectorAll('.legend-bar').forEach(bar => {
+                    bar.style.width = bar.dataset.width;
+                });
+            }, 100);
+        }
+
+        // ==================== 推荐方案生成 ====================
+        function generateRecommendations(faceType, scores, browType, lipType) {
             const recs = [];
-            
-            // 通用建议
             recs.push('💡 护肤基础：早晚清洁+保湿+防晒，好皮肤是颜值的底色');
             recs.push('💡 作息调整：保证7-8小时睡眠，熬夜是颜值的最大杀手');
-            
-            // 根据脸型给妆容建议
+
             if (faceType.name.includes('丰润')) {
-                recs.push('💄 唇妆：选择豆沙色、枫叶色等深色唇膏，避免荧光色和珠光唇彩');
-                recs.push('💄 修容：高光打在下巴尖和鼻梁，侧影从耳际扫向嘴角，拉长脸型');
-                recs.push('💄 眉毛：略带弧度的眉形，眉尾稍微拉长，平衡面部比例');
-                recs.push('👗 穿搭：V领、大翻领上衣拉长颈部线条，避免高领和圆领');
-                recs.push('👗 发型：侧分长卷发或八字刘海，露出额头，避免厚重齐刘海');
+                recs.push('💄 唇妆：选择豆沙色、枫叶色等深色唇膏，避免荧光色');
+                recs.push('💄 修容：高光打在下巴尖和鼻梁，侧影从耳际扫向嘴角');
+                recs.push('👗 发型：侧分长卷发或八字刘海，露出额头更显气质');
             } else if (faceType.name.includes('柔和')) {
-                recs.push('💄 唇妆：选择珊瑚色、玫瑰豆沙色等饱满唇色，避免裸色和吃土色');
-                recs.push('💄 高光：重点打在T区、面中和下巴，增加面部饱满感');
-                recs.push('💄 腮红：选择蜜桃色打在苹果肌，提升气色和立体感');
-                recs.push('👗 穿搭：荷叶边、泡泡袖等增加上半身的层次感');
-                recs.push('👗 发型：空气刘海、法式刘海或蓬松卷发，增加柔和感');
+                recs.push('💄 唇妆：选择珊瑚色、玫瑰豆沙等饱满唇色');
+                recs.push('💄 高光：重点打在T区和面中，增加饱满感');
+                recs.push('👗 发型：空气刘海或蓬松卷发，增加柔和感');
             } else if (faceType.name === '直面型') {
-                recs.push('💄 妆容：你的脸型很标准！可以尝试各种风格：日系清透、韩系水光、欧美立体都适合');
-                recs.push('👗 穿搭：基本不挑衣服，根据身材优势选择：腿长就穿高腰，腰细就穿收腰');
-                recs.push('👗 发型：直发卷发都可以，根据气质选择：直发清冷，卷发温柔');
+                recs.push('💄 妆容：脸型标准！日系清透、韩系水光、欧美立体都适合');
+                recs.push('👗 穿搭：基本不挑衣服，根据身材优势选择风格');
             } else if (faceType.name.includes('微凸')) {
-                recs.push('💄 妆容：强调眉眼，弱化唇部，眼线稍微上扬增加灵气');
-                recs.push('👗 穿搭：简约大气的风格更能凸显你的气质，避免过于繁复的装饰');
+                recs.push('💄 妆容：强调眉眼，弱化唇部，眼线稍上扬增加灵气');
+                recs.push('👗 穿搭：简约大气风格更凸显气质');
             } else if (faceType.name.includes('立体')) {
-                recs.push('💄 妆容：重点打造眉眼，用眼线拉长眼型转移视觉焦点');
-                recs.push('💄 修容：侧影从颧骨斜扫向下，修饰面部轮廓');
-                recs.push('👗 穿搭：大领口、纵向线条的衣服拉长身形，避免横向条纹');
-                recs.push('👗 发型：侧分长发最佳，可以遮挡部分轮廓，拍照时微微低头');
+                recs.push('💄 妆容：重点打造眉眼，眼线拉长眼型转移焦点');
+                recs.push('👗 发型：侧分长发最佳，微微低头找最佳角度');
             }
-            
-            // 根据五官给具体建议
+
             if (scores['眼睛形态'] < 80) {
-                recs.push('👁️ 眼妆技巧：内眼线填满睫毛根部，眼尾稍微上扬；睫毛膏重点刷根部增加支撑力');
-                recs.push('👁️ 双眼皮贴：如果是单眼皮/内双，可以尝试橄榄型双眼皮贴');
+                recs.push('👁 眼妆：内眼线填满睫毛根部，眼尾稍上扬');
             } else {
-                recs.push('👁️ 眼妆优势：你的眼睛很有神！可以尝试各种眼影配色');
+                recs.push('👁 眼妆优势：眼睛很有神！可以尝试各种眼影配色');
             }
-            
-            if (scores['鼻子立体度'] < 80) {
-                recs.push('👃 鼻影技巧：从眼窝向鼻梁轻扫，鼻头画小V字，不要一条直线画下来');
-                recs.push('👃 高光技巧：只在鼻梁中段和鼻尖点涂高光，避免整条发光');
-            } else {
-                recs.push('👃 鼻子优势：你的鼻子很立体！轻扫鼻影即可，不用过度修饰');
+            if (scores['鼻子立体'] < 80) {
+                recs.push('👃 鼻影：从眼窝向鼻梁轻扫，鼻头画小V字');
             }
-            
-            if (scores['三庭比例'] < 80) {
-                recs.push('✂️ 发际线：可以用发际线粉填补，或剪法式刘海、八字刘海修饰');
-                recs.push('✂️ 发型：高马尾、丸子头拉长上庭，避免贴头皮的中分');
-            }
-            
-            if (scores['五眼分布'] < 80) {
-                recs.push('👀 眼距调整：眼距宽就加强内眼角眼线，眼距近就弱化内眼角');
-            }
-            
-            // 根据眉形给建议
+
             if (browType) {
-                if (browType.name === '野生眉') {
-                    recs.push('🖌️ 眉毛打理：只修掉明显多余的杂毛，保留原生蓬松感');
-                    recs.push('🖌️ 定型技巧：用透明眉胶顺着毛流梳理定型，保持根根分明');
-                    recs.push('🖌️ 填补空缺：如有稀疏处，用极细眉笔模拟毛流一根根填补');
-                } else if (browType.name === '柳叶眉') {
-                    recs.push('🖌️ 弧度维护：定期修整保持柳叶弧线，眉尾自然收尖');
-                    recs.push('🖌️ 画眉技巧：沿眉毛生长方向轻描，用细头眉笔勾勒眉尾弧度');
-                    recs.push('🖌️ 下缘修整：保持眉毛下缘干净利落，上缘弧线流畅');
-                } else if (browType.name === '平眉') {
-                    recs.push('🖌️ 平直保持：眉头到眉尾保持水平，上下边缘平行');
-                    recs.push('🖌️ 眉尾控制：眉尾不要超过眼尾延长线，用眉粉填充比眉笔更自然');
-                    recs.push('🖌️ 长度注意：平眉不宜过长，否则会显得拖沓无力');
-                } else if (browType.name === '落尾眉') {
-                    recs.push('🖌️ 落尾把控：眉尾最低点不要低于眉头，避免显没精神');
-                    recs.push('🖌️ 过渡自然：从眉头到眉尾自然过渡，用浅色眉粉打底');
-                    recs.push('🖌️ 无辜感打造：搭配下至眼线和腮红，放大无辜可爱感');
-                } else if (browType.name === '剑眉') {
-                    recs.push('🖌️ 锋利线条：保持从眉头到眉尾的上扬走势，眉尾利落收尖');
-                    recs.push('🖌️ 眉头处理：眉头用眉粉自然晕开，避免过于生硬');
-                    recs.push('🖌️ 柔化方法：如果想日常温柔些，可以把眉峰角度稍微圆润处理');
-                } else if (browType.name === '弯月眉') {
-                    recs.push('🖌️ 对称是关键：弯月眉最怕两边不对称，画眉时先对比再填充');
-                    recs.push('🖌️ 眉峰柔和：眉峰不要过于尖锐，圆润过渡最自然');
-                } else if (browType.name === '挑眉') {
-                    recs.push('🖌️ 眉峰柔化：用眉粉填充眉峰下方三角区，降低尖锐感');
-                    recs.push('🖌️ 眉头晕染：眉头用刷子晕染自然，避免过于生硬的起笔');
-                    recs.push('🖌️ 气场搭配：挑眉搭配猫眼眼线，气场直接拉满');
-                } else {
-                    recs.push('🖌️ 眉毛保养：定期修整眉形，保持对称和清洁的轮廓');
-                    recs.push('🖌️ 眉眼搭配：画眉时注意与眼妆风格统一，淡妆配淡眉，浓妆配重眉');
+                recs.push('🖌 眉形：' + browType.suggestion);
+            }
+
+            // 唇形专属建议
+            if (lipType) {
+                recs.push('👄 唇色推荐：' + lipType.colorRec);
+                recs.push('👄 唇妆技巧：' + lipType.suggestion);
+
+                // 根据唇形类型给出额外护理建议
+                if (lipType.name === '薄唇') {
+                    recs.push('👄 唇部丰盈：睡前涂厚唇膜，日常用含薄荷成分的唇蜜增加视觉饱满感');
+                } else if (lipType.name === '厚唇/欧美唇') {
+                    recs.push('👄 唇部修饰：用遮瑕轻拍唇外缘可缩小轮廓，哑光质地比水光更日常');
+                } else if (lipType.name === '嘟嘟唇') {
+                    recs.push('👄 唇部保养：保持唇部水润是关键！定期去角质+唇膜，让嘟嘟感更精致');
+                } else if (lipType.name === '微笑唇') {
+                    recs.push('👄 嘴角维护：用遮瑕提亮嘴角，搭配咬唇妆效果最甜美');
+                } else if (lipType.name === 'M唇/花瓣唇') {
+                    recs.push('👄 唇峰强调：沿天然M形唇峰精准描绘，用哑光唇膏最能体现唇形轮廓');
+                } else if (lipType.name === '樱桃唇') {
+                    recs.push('👄 唇部放大：唇中央叠涂浅色/亮色唇蜜，打造视觉放大效果');
+                } else if (lipType.name === '鹅蛋唇/椭圆唇') {
+                    recs.push('👄 百搭唇形：你的唇形什么颜色都能驾驭，根据场合和心情自由选色');
+                } else if (lipType.name === '平直唇') {
+                    recs.push('👄 唇形利用：保持平直线条的利落感，哑光裸色系最能体现中性高级气质');
                 }
             }
-            
-            // 穿搭通用建议
-            recs.push('👠 身形优化：高腰裤/裙提高腰线，视觉上拉长腿部比例');
-            recs.push('👠 配色建议：全身颜色不超过3种，同色系搭配更显高级');
-            recs.push('👠 配饰点缀：一对合适的耳环可以点亮整体造型，根据脸型选择：圆脸选长款，长脸选圆形');
-            
-            // 心态建议
-            recs.push('💖 最重要：自信是最好的妆容！站直、微笑、眼神坚定，你就是最美的');
-            
+
+            recs.push('👠 身形：高腰裤/裙提高腰线，全身颜色不超过3种');
+            recs.push('💖 最重要：自信是最好的妆容！站直、微笑、眼神坚定');
             return recs;
         }
-        
+
+        // ==================== 分享 ====================
+        function shareResult() {
+            if (!lastResult) return;
+            const text = `【AI颜值测评结果】\n综合评分：${lastResult.totalScore}分 ${getStars(lastResult.totalScore)}\n脸型：${lastResult.faceType.name}\n眉形：${lastResult.browType.name}\n唇形：${lastResult.lipType.name}\n${getScoreDesc(lastResult.totalScore)}`;
+
+            if (navigator.share) {
+                navigator.share({ title: 'AI颜值测评', text, url: location.href }).catch(() => {});
+            } else if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('结果已复制到剪贴板')).catch(() => showToast('复制失败'));
+            } else {
+                showToast('当前浏览器不支持分享');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ==================== 历史记录 ====================
+        function saveHistory(faceName, score) {
+            const history = JSON.parse(localStorage.getItem('beautyHistory') || '[]');
+            history.unshift({
+                face: faceName,
+                score,
+                time: new Date().toLocaleString('zh-CN'),
+                thumb: currentImageData ? currentImageData.substring(0, 200) : null
+            });
+            if (history.length > 20) history.pop();
+            localStorage.setItem('beautyHistory', JSON.stringify(history));
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('beautyHistory') || '[]');
+            const container = document.getElementById('historyContainer');
+
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="history-empty">
+                        <span class="empty-icon">📋</span>
+                        <div>还没有测评记录</div>
+                        <div style="font-size: 13px; margin-top: 8px;">上传照片开始第一次测评吧</div>
+                    </div>`;
+                return;
+            }
+
+            let html = '<div class="history-list">';
+            history.forEach(item => {
+                html += `
+                    <div class="history-item">
+                        <div style="width:56px;height:56px;border-radius:12px;background:rgba(167,139,250,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">👤</div>
+                        <div class="history-info">
+                            <div class="history-face">${item.face}</div>
+                            <div class="history-time">${item.time}</div>
+                        </div>
+                        <div class="history-score">${item.score}</div>
+                    </div>`;
+            });
+            html += '</div>';
+            html += `<div class="history-clear"><button onclick="clearHistory()">清空记录</button></div>`;
+            container.innerHTML = html;
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('beautyHistory');
+            renderHistory();
+            showToast('历史记录已清空');
+        }
+
+        // ==================== 重新测试 ====================
         function restart() {
             document.getElementById('resultSection').classList.remove('active');
-            document.getElementById('uploadSection').style.display = 'block';
+            uploadSection.style.display = 'block';
             document.getElementById('fileInput').value = '';
+            document.getElementById('cameraInput').value = '';
+            currentImageData = null;
+            lastResult = null;
         }
     </script>
 </body>
