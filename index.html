@@ -586,6 +586,7 @@
         .card-brow .card-icon { background: rgba(244, 114, 182, 0.2); }
         .card-lip .card-icon { background: rgba(248, 113, 113, 0.2); }
         .card-suggest .card-icon { background: rgba(96, 165, 250, 0.2); }
+        .card-intensity .card-icon { background: rgba(232, 121, 249, 0.2); }
 
         .analysis-content {
             color: rgba(255, 255, 255, 0.65);
@@ -989,6 +990,10 @@
                             <h3><span class="card-icon">👄</span> 唇形分析</h3>
                             <div class="analysis-content" id="lipResult"></div>
                         </div>
+                        <div class="analysis-card card-intensity">
+                            <h3><span class="card-icon">🎭</span> 浓颜 vs 淡颜</h3>
+                            <div class="analysis-content" id="intensityResult"></div>
+                        </div>
                         <div class="analysis-card card-suggest">
                             <h3><span class="card-icon">💡</span> 变美建议</h3>
                             <div class="analysis-content" id="suggestionsResult"></div>
@@ -1227,6 +1232,60 @@
             '立体型面型': { high: ["吕燕", "杜鹃", "刘雯"], mid: ["孙菲菲", "何穗"] }
         };
 
+        // ==================== 浓颜/淡颜分析 ====================
+        const faceIntensityTypes = {
+            strong: {
+                name: '浓颜系',
+                tag: '🔥 浓颜',
+                desc: '你的五官存在感强，色彩对比鲜明，骨相立体深邃。第一眼就被五官牢牢抓住，属于"一眼抓人"型长相。',
+                features: ['五官轮廓清晰，线条锐利', '眉浓眼深，黑白对比强', '面部骨骼立体，轮廓感明显', '整体色彩饱和度高，视觉冲击力强'],
+                celebRef: ['迪丽热巴', '刘亦菲', '李嘉欣', '朱珠'],
+                aura: '大气、明艳、御姐、有攻击性的美',
+                makeupTips: '浓颜底子好，淡妆即有气场。裸妆或哑光质感最能突出五官优势，避免过度叠加造成"用力过猛"。',
+                styleTips: '大轮廓的耳饰、简约线条的服装最衬你。浓颜+简约=高级感。'
+            },
+            light: {
+                name: '淡颜系',
+                tag: '🌸 淡颜',
+                desc: '你的五官柔和内敛，色彩过渡自然，骨相平缓温柔。不是靠单个五官取胜，而是整体气质先入为人心，越看越好看。',
+                features: ['五官线条柔和，边界感弱', '眉色偏浅，眼妆留白多', '面部骨骼平缓，轮廓圆润', '整体色调柔和，过渡自然'],
+                celebRef: ['刘诗诗', '刘亦菲（淡妆时）', '谭松韵', '金高银'],
+                aura: '温柔、清冷、邻家、氛围感美人',
+                makeupTips: '淡颜的优势是"可塑性"。强调某一个五官（如眼妆或唇色）就能变化风格，日系/韩系/文艺风都能驾驭。',
+                styleTips: '柔和面料（针织、雪纺）和浅色系最衬你。精致小巧的配饰比大轮廓更加分。'
+            },
+            strongLight: {
+                name: '浓中带淡',
+                tag: '🔥🌸 浓中带淡',
+                desc: '你的骨相偏立体但五官线条柔和，或者色彩对比强但轮廓圆润。这种"浓颜骨相+淡颜气质"的组合非常有记忆点，兼具冲击力和耐看度。',
+                features: ['骨骼立体但五官线条偏柔', '色彩对比感中等偏高', '正面看气质清淡，侧面轮廓深邃', '妆前偏淡，妆后可以很浓'],
+                celebRef: ['章子怡', '倪妮', '汤唯', '周冬雨'],
+                aura: '高级感、变化丰富、可甜可御',
+                makeupTips: '你最适合"在浓淡之间切换"。日常淡妆走气质路线，出席场合加重眉眼即可华丽转场。',
+                styleTips: '你的穿搭包容度很高，简约和华丽都能撑住。根据场合灵活调整即可。'
+            },
+            lightStrong: {
+                name: '淡中带浓',
+                tag: '🌸🔥 淡中带浓',
+                desc: '你的整体气质偏柔和清淡，但某个五官特别出挑（比如眉浓、唇艳、或眼神锐利）。这个"点睛之笔"让你在淡颜的基础上多了辨识度。',
+                features: ['整体色调柔和，但有一两处亮点', '骨相平缓但某处线条锐利', '第一眼看是淡颜，细看有浓颜元素', '素颜清淡但上妆变化大'],
+                celebRef: ['杨幂', '赵丽颖', '景甜', '关晓彤'],
+                aura: '甜美中带一丝锋芒、有记忆点的邻家美',
+                makeupTips: '找到你的"浓颜点"重点强调。如果是眉浓就保持野生眉，如果是唇艳就画好唇妆，让这个特点成为标志。',
+                styleTips: '甜酷风格最适合你——基础淡雅搭配一件有态度的单品（红唇、皮衣、个性配饰）。'
+            }
+        };
+
+        // 浓淡颜与脸型的关联倾向
+        const intensityFaceMatch = {
+            '直面型': { strong: 25, light: 30, strongLight: 25, lightStrong: 20 },
+            '微凸面型': { strong: 35, light: 15, strongLight: 30, lightStrong: 20 },
+            '丰润型面型': { strong: 20, light: 25, strongLight: 20, lightStrong: 35 },
+            '微凹面型': { strong: 15, light: 35, strongLight: 20, lightStrong: 30 },
+            '柔和型面型': { strong: 10, light: 40, strongLight: 15, lightStrong: 35 },
+            '立体型面型': { strong: 45, light: 5, strongLight: 35, lightStrong: 15 }
+        };
+
         // ==================== 标签页切换 ====================
         function switchTab(tab) {
             document.querySelectorAll('.tab-item').forEach((t, i) => {
@@ -1339,6 +1398,27 @@
             const lipMatchScore = lipMatchTable[randomLipType.name] || (Math.floor(Math.random() * 15 + 75));
             const lipHarmonyScore = Math.min(99, Math.max(60, lipMatchScore + Math.floor(Math.random() * 6 - 3)));
 
+            // 浓颜/淡颜判定
+            const intensityWeights = intensityFaceMatch[randomFaceType.name] || intensityFaceMatch['直面型'];
+            // 根据脸型权重 + 五官指标综合计算
+            const noseScore = clamp(77 + (totalScore - 80) + rand(-6, 6));
+            const eyeScore = clamp(78 + (totalScore - 80) + rand(-7, 7));
+            // 五官立体度和色彩对比影响浓淡倾向
+            const strongBonus = (noseScore > 82 ? 10 : 0) + (eyeScore > 83 ? 8 : 0) + (browHarmonyScore > 88 ? 5 : 0);
+            const lightBonus = (noseScore <= 82 ? 10 : 0) + (eyeScore <= 83 ? 8 : 0);
+            const finalWeights = {
+                strong: intensityWeights.strong + strongBonus + rand(-5, 5),
+                light: intensityWeights.light + lightBonus + rand(-5, 5),
+                strongLight: intensityWeights.strongLight + rand(-8, 8),
+                lightStrong: intensityWeights.lightStrong + rand(-8, 8)
+            };
+            const intensityKey = Object.keys(finalWeights).reduce((a, b) => finalWeights[a] >= finalWeights[b] ? a : b);
+            const intensityType = faceIntensityTypes[intensityKey];
+            // 计算浓淡程度百分比
+            const totalWeight = finalWeights.strong + finalWeights.light + finalWeights.strongLight + finalWeights.lightStrong;
+            const strongPct = Math.round((finalWeights.strong + finalWeights.strongLight * 0.7 + finalWeights.lightStrong * 0.3) / totalWeight * 100);
+            const lightPct = 100 - strongPct;
+
             // 基于总分生成相关联的分项评分
             const baseOffset = totalScore - 80;
             const featureScores = {
@@ -1352,7 +1432,7 @@
                 '下颌线条': clamp(79 + baseOffset + rand(-6, 6))
             };
 
-            lastResult = { faceType: randomFaceType, browType: randomBrowType, lipType: randomLipType, totalScore, featureScores, browHarmonyScore, lipHarmonyScore };
+            lastResult = { faceType: randomFaceType, browType: randomBrowType, lipType: randomLipType, intensityType, strongPct, lightPct, totalScore, featureScores, browHarmonyScore, lipHarmonyScore };
 
             // -- 显示总分（计数动画）
             animateScore(0, totalScore, 1200);
@@ -1414,6 +1494,34 @@
                 <strong>唇妆建议：</strong>${randomLipType.suggestion}
             `;
 
+            // -- 浓颜/淡颜分析
+            document.getElementById('intensityResult').innerHTML = `
+                <strong style="color: #e879f9; font-size: 17px;">${intensityType.tag} ${intensityType.name}</strong><br><br>
+                ${intensityType.desc}<br><br>
+                <div style="margin:12px 0;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <span style="font-size:13px;color:rgba(255,255,255,0.5);min-width:36px;">浓颜</span>
+                        <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;">
+                            <div style="height:100%;width:${strongPct}%;background:linear-gradient(90deg,#f472b6,#ef4444);border-radius:4px;transition:width 1s ease;"></div>
+                        </div>
+                        <span style="font-size:13px;color:rgba(255,255,255,0.6);min-width:32px;text-align:right;">${strongPct}%</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-size:13px;color:rgba(255,255,255,0.5);min-width:36px;">淡颜</span>
+                        <div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;">
+                            <div style="height:100%;width:${lightPct}%;background:linear-gradient(90deg,#a78bfa,#60a5fa);border-radius:4px;transition:width 1s ease;"></div>
+                        </div>
+                        <span style="font-size:13px;color:rgba(255,255,255,0.6);min-width:32px;text-align:right;">${lightPct}%</span>
+                    </div>
+                </div>
+                <strong>你的特征：</strong><br>
+                ${intensityType.features.map(f => '• ' + f).join('<br>')}<br><br>
+                <strong>气质关键词：</strong>${intensityType.aura}<br>
+                <strong>明星参考：</strong>${intensityType.celebRef.join('、')}<br><br>
+                <strong>妆容建议：</strong>${intensityType.makeupTips}<br>
+                <strong>穿搭建议：</strong>${intensityType.styleTips}
+            `;
+
             // -- 建议
             document.getElementById('suggestionsResult').innerHTML = randomFaceType.suggestion;
 
@@ -1422,7 +1530,7 @@
             renderLegend(featureScores);
 
             // -- 推荐方案
-            const recs = generateRecommendations(randomFaceType, featureScores, randomBrowType, randomLipType);
+            const recs = generateRecommendations(randomFaceType, featureScores, randomBrowType, randomLipType, intensityType);
             document.getElementById('recommendationList').innerHTML = recs.map(r => {
                 const icon = r.substring(0, 2);
                 const text = r.substring(3);
@@ -1591,7 +1699,7 @@
         }
 
         // ==================== 推荐方案生成 ====================
-        function generateRecommendations(faceType, scores, browType, lipType) {
+        function generateRecommendations(faceType, scores, browType, lipType, intensityType) {
             const recs = [];
             recs.push('💡 护肤基础：早晚清洁+保湿+防晒，好皮肤是颜值的底色');
             recs.push('💡 作息调整：保证7-8小时睡眠，熬夜是颜值的最大杀手');
@@ -1654,6 +1762,13 @@
             }
 
             recs.push('👠 身形：高腰裤/裙提高腰线，全身颜色不超过3种');
+
+            // 浓淡颜专属建议
+            if (intensityType) {
+                recs.push('🎭 浓淡颜妆容：' + intensityType.makeupTips);
+                recs.push('🎭 浓淡颜穿搭：' + intensityType.styleTips);
+            }
+
             recs.push('💖 最重要：自信是最好的妆容！站直、微笑、眼神坚定');
             return recs;
         }
@@ -1661,7 +1776,7 @@
         // ==================== 分享 ====================
         function shareResult() {
             if (!lastResult) return;
-            const text = `【AI颜值测评结果】\n综合评分：${lastResult.totalScore}分 ${getStars(lastResult.totalScore)}\n脸型：${lastResult.faceType.name}\n眉形：${lastResult.browType.name}\n唇形：${lastResult.lipType.name}\n${getScoreDesc(lastResult.totalScore)}`;
+            const text = `【AI颜值测评结果】\n综合评分：${lastResult.totalScore}分 ${getStars(lastResult.totalScore)}\n脸型：${lastResult.faceType.name}\n眉形：${lastResult.browType.name}\n唇形：${lastResult.lipType.name}\n浓淡颜：${lastResult.intensityType.name}（浓${lastResult.strongPct}% / 淡${lastResult.lightPct}%）\n${getScoreDesc(lastResult.totalScore)}`;
 
             if (navigator.share) {
                 navigator.share({ title: 'AI颜值测评', text, url: location.href }).catch(() => {});
