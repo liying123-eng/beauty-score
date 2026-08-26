@@ -2393,7 +2393,7 @@ function loadModels() {
   var status = document.getElementById('modelStatus');
   status.textContent = '⏳ AI模型加载中...';
   status.className = 'model-status loading';
-  var MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+  var MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models/';
   Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
     faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
