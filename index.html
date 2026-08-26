@@ -3,1136 +3,2613 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>深层欲望测试器</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<title>AI 全能颜值解析 - 五官·脸型·眉形·唇形·人生剧本</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    background: #0a0a0f;
-    color: #e8d5a3;
-    font-family: 'SimSun', 'STSong', serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  /* 粒子背景 */
-  #particles {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-  }
-  .particle {
-    position: absolute;
-    width: 2px; height: 2px;
-    background: #c9a84c;
-    border-radius: 50%;
-    opacity: 0;
-    animation: float linear infinite;
-  }
-  @keyframes float {
-    0% { transform: translateY(100vh) scale(0); opacity: 0; }
-    10% { opacity: 0.6; }
-    90% { opacity: 0.3; }
-    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-  }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 40px 20px 80px;
-  }
+        /* 动态粒子背景 */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
-  /* 封面页 */
-  #cover-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 40px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #a78bfa, #f472b6, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% 200%;
+            animation: gradientShift 4s ease infinite;
+            letter-spacing: 2px;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+
+        
+
+        /* 上传区域 */
+        .upload-section {
+            border: 2px dashed rgba(167, 139, 250, 0.3);
+            border-radius: 22px;
+            padding: 55px 40px;
+            text-align: center;
+            margin-bottom: 24px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            background: rgba(167, 139, 250, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.06), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .upload-section:hover::before {
+            left: 100%;
+        }
+
+        .upload-section:hover {
+            border-color: rgba(167, 139, 250, 0.6);
+            background: rgba(167, 139, 250, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .upload-section.drag-over {
+            border-color: #a78bfa;
+            background: rgba(167, 139, 250, 0.12);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 56px;
+            margin-bottom: 18px;
+            display: block;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 22px;
+        }
+
+        .upload-btn {
+            padding: 12px 28px;
+            border-radius: 14px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-weight: 500;
+        }
+
+        .upload-btn-primary {
+            background: linear-gradient(135deg, #a78bfa, #818cf8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+        }
+
+        .upload-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.45);
+        }
+
+        .upload-btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .upload-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: white;
+        }
+
+        #fileInput, #cameraInput {
+            display: none;
+        }
+
+        /* 预览区 */
+        .preview-section {
+            display: none;
+            margin-bottom: 28px;
+        }
+
+        .preview-section.active {
+            display: block;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .preview-image {
+            max-width: 380px;
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preview-badge {
+            position: absolute;
+            top: 14px;
+            right: calc(50% - 190px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+            color: white;
+            border: none;
+            padding: 18px 56px;
+            border-radius: 50px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: block;
+            margin: 0 auto;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .analyze-btn:hover::before {
+            left: 100%;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(167, 139, 250, 0.5);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .loading.active {
+            display: block;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        .loading-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            position: relative;
+        }
+
+        .loading-ring svg {
+            width: 80px;
+            height: 80px;
+            transform: rotate(-90deg);
+        }
+
+        .loading-ring circle {
+            fill: none;
+            stroke-width: 4;
+        }
+
+        .loading-ring .bg {
+            stroke: rgba(255, 255, 255, 0.08);
+        }
+
+        .loading-ring .progress {
+            stroke: url(#loadGradient);
+            stroke-linecap: round;
+            stroke-dasharray: 226;
+            stroke-dashoffset: 226;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .loading-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #c4b5fd;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .loading-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .loading-step {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 13px;
+            min-height: 20px;
+        }
+
+        .loading-steps {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.done {
+            color: #4ade80;
+        }
+
+        .step-item.current {
+            color: #c4b5fd;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.done .step-dot {
+            background: #4ade80;
+        }
+
+        .step-item.current .step-dot {
+            background: #a78bfa;
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.6);
+            animation: pulse 1.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+        }
+
+        /* 结果区域 */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        /* 总分卡片 */
+        .score-card {
+            background: linear-gradient(135deg, #a78bfa 0%, #f472b6 50%, #fb923c 100%);
+            border-radius: 24px;
+            padding: 44px;
+            text-align: center;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+            animation: cardReveal 0.6s ease;
+        }
+
+        @keyframes cardReveal {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, -20px); }
+        }
+
+        .score-label {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .score-value {
+            font-size: 80px;
+            font-weight: 800;
+            color: white;
+            position: relative;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .score-value .unit {
+            font-size: 28px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .score-desc {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            font-weight: 500;
+        }
+
+        .score-stars {
+            margin-top: 12px;
+            font-size: 22px;
+            position: relative;
+            letter-spacing: 4px;
+        }
+
+        /* 明星对标 */
+        .celeb-match {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.6s ease 0.2s both;
+        }
+
+        .celeb-match h3 {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .celeb-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+
+.celeb-card {
+    display: flex; gap: 12px; align-items: center;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 14px; transition: all 0.3s;
+    animation: fadeSlideIn 0.5s ease both;
+}
+.celeb-card:hover {
+    background: rgba(255,255,255,0.08); transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.celeb-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.celeb-info { flex: 1; min-width: 0; }
+.celeb-name {
+    font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9);
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;
+}
+.celeb-pct { font-size: 13px; color: #a78bfa; font-weight: 700; }
+.celeb-tag-sm { font-size: 11px; color: #f472b6; margin-bottom: 3px; }
+.celeb-desc { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.4; }
+.celeb-rep { font-size: 12px; color: #fbbf24; margin-bottom: 2px; font-weight: 500; }
+
+
+        
+
+        /* 分析卡片网格 */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+            animation: fadeSlideIn 0.5s ease both;
+        }
+
+        .analysis-card:nth-child(1) { animation-delay: 0.1s; }
+        .analysis-card:nth-child(2) { animation-delay: 0.2s; }
+        .analysis-card:nth-child(3) { animation-delay: 0.3s; }
+        .analysis-card:nth-child(4) { animation-delay: 0.4s; }
+        .analysis-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .analysis-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-card h3 {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 17px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .card-face .card-icon { background: rgba(251, 146, 60, 0.2); }
+        .card-features .card-icon { background: rgba(74, 222, 128, 0.2); }
+        .card-brow .card-icon { background: rgba(244, 114, 182, 0.2); }
+        .card-lip .card-icon { background: rgba(248, 113, 113, 0.2); }
+        .card-suggest .card-icon { background: rgba(96, 165, 250, 0.2); }
+        .card-intensity .card-icon { background: rgba(232, 121, 249, 0.2); }
+
+        .analysis-content {
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.85;
+            font-size: 14px;
+        }
+
+        .analysis-content strong {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* 雷达图区域 */
+        .radar-section {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.5s ease 0.5s both;
+        }
+
+        .radar-section h4 {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 17px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .radar-container {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #radarChart {
+            max-width: 280px;
+            width: 100%;
+        }
+
+        .radar-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .legend-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            min-width: 80px;
+        }
+
+        .legend-bar-wrap {
+            width: 100px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .legend-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+            width: 0;
+        }
+
+        .legend-value {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        /* 推荐方案 */
+        .recommendation {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            animation: fadeSlideIn 0.5s ease 0.6s both;
+        }
+
+        .recommendation h4 {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 17px;
+            margin-bottom: 18px;
+        }
+
+        .recommendation ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendation li {
+            padding: 10px 0;
+            padding-left: 28px;
+            position: relative;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.7;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .recommendation li:last-child {
+            border-bottom: none;
+        }
+
+        .recommendation li::before {
+            content: attr(data-icon);
+            position: absolute;
+            left: 0;
+            font-size: 14px;
+        }
+
+        /* 底部操作栏 */
+        .action-bar {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            animation: fadeSlideIn 0.5s ease 0.7s both;
+        }
+
+        .action-btn {
+            padding: 16px 36px;
+            border-radius: 50px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: none;
+        }
+
+        .btn-restart {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-restart:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #a78bfa, #f472b6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+        }
+
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(167, 139, 250, 0.45);
+        }
+
+        /* 历史记录标签页 */
+        .history-empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .history-empty .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .history-thumb {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-face {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .history-time {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 12px;
+        }
+
+        .history-score {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .history-clear {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .history-clear button {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .history-clear button:hover {
+            color: #f87171;
+            border-color: rgba(248, 113, 113, 0.3);
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 9999;
+            transition: transform 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px 18px;
+                border-radius: 22px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .score-value {
+                font-size: 60px;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-section {
+                padding: 40px 20px;
+            }
+
+            .preview-badge {
+                right: 14px;
+            }
+
+            .radar-container {
+                flex-direction: column;
+            }
+
+            .score-card {
+                padding: 30px 20px;
+            }
+        }
+    
+
+/* From face-analysis */
+.life-card{background:linear-gradient(135deg,rgba(244,208,63,0.1),rgba(230,126,34,0.06));border:1px solid rgba(244,208,63,0.2);border-radius:18px;padding:26px;margin-bottom:24px}
+.life-badge{display:inline-block;background:linear-gradient(90deg,#f4d03f,#e67e22);color:#1a0a2e;padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:12px}
+.life-title{font-size:1.5em;font-weight:700;color:#f4d03f;margin-bottom:10px}
+.life-desc{color:#d0d0e0;line-height:1.9;font-size:14px}
+.life-future{margin-top:16px;padding:14px;background:rgba(0,0,0,0.2);border-radius:12px;font-size:14px;line-height:1.8;color:#e0e0f0;text-align:left}
+.life-future strong{color:#f4d03f}
+
+
+.indicator-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:24px}
+.ind-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:16px}
+.ind-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ind-name{font-size:13px;font-weight:600;color:#c4b5fd}
+.ind-score{font-size:15px;font-weight:700;color:#4ade80}
+.ind-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.ind-fill{height:100%;border-radius:2px}
+.ind-text{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6}
+.review-card{background:linear-gradient(135deg,rgba(167,139,250,0.12),rgba(244,114,182,0.08));border:1px solid rgba(167,139,250,0.25);border-radius:20px;padding:30px;text-align:center;margin-top:28px}
+.review-card h3{font-size:1.2em;color:#c4b5fd;margin-bottom:10px}
+.review-card p{color:rgba(255,255,255,0.6);font-size:14px;line-height:1.8;margin-bottom:16px}
+.review-stars{font-size:36px;letter-spacing:8px;color:#fbbf24;margin:12px 0;cursor:pointer;user-select:none}
+.review-stars span{transition:transform .2s;display:inline-block}
+.review-stars span:hover{transform:scale(1.3)}
+.review-btn{display:inline-block;padding:12px 36px;background:linear-gradient(135deg,#a78bfa,#f472b6);border:none;border-radius:25px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.review-btn:hover{transform:scale(1.05)}
+.progress-row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.progress-row .label{font-size:13px;color:rgba(255,255,255,0.5);min-width:36px}
+.progress-row .bar{flex:1;height:7px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.progress-row .fill{height:100%;border-radius:4px;transition:width 1s ease}
+.progress-row .val{font-size:13px;color:rgba(255,255,255,0.5);min-width:32px;text-align:right}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.section-title{font-size:1.15em;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px}
+@media(max-width:640px){.grid-2{grid-template-columns:1fr}.indicator-grid{grid-template-columns:1fr}}
+
+
+/* face-analysis styles */
+.results { display: none; }
+.type-card {
+    background: linear-gradient(135deg, rgba(244,208,63,0.12), rgba(230,126,34,0.08));
+    border: 1px solid rgba(244,208,63,0.25);
+    border-radius: 18px;
+    padding: 28px 24px;
     text-align: center;
-  }
-
-  .cover-symbol {
-    font-size: 64px;
-    margin-bottom: 24px;
-    filter: drop-shadow(0 0 20px #c9a84c88);
-    animation: pulse 3s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { filter: drop-shadow(0 0 20px #c9a84c88); }
-    50% { filter: drop-shadow(0 0 40px #c9a84ccc); }
-  }
-
-  .cover-title {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: 6px;
-    color: #c9a84c;
-    text-shadow: 0 0 30px #c9a84c66;
-    margin-bottom: 16px;
-  }
-
-  .cover-subtitle {
-    font-size: 14px;
-    letter-spacing: 3px;
-    color: #8a7a5a;
-    margin-bottom: 48px;
-    line-height: 2;
-  }
-
-  .cover-desc {
-    font-size: 13px;
-    color: #6a5f45;
-    line-height: 2;
-    margin-bottom: 48px;
-    max-width: 400px;
-    border: 1px solid #2a2218;
-    padding: 20px 24px;
-    background: #0d0c09;
-  }
-
-  .btn-start {
-    background: linear-gradient(135deg, #c9a84c, #8a6a2a);
-    color: #0a0a0f;
-    border: none;
-    padding: 16px 48px;
-    font-size: 16px;
-    letter-spacing: 4px;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 700;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-start::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-  .btn-start:hover::before { left: 100%; }
-  .btn-start:hover {
-    box-shadow: 0 0 30px #c9a84c66;
-    transform: translateY(-2px);
-  }
-
-  /* 进度条 */
-  #progress-bar-wrap {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 3px;
-    background: #1a1810;
-    z-index: 100;
-  }
-  #progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #c9a84c, #e8d5a3);
-    transition: width 0.4s ease;
-    box-shadow: 0 0 10px #c9a84c;
-  }
-
-  /* 题目页 */
-  #question-page { display: none; }
-
-  .q-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-
-  .q-category {
-    display: inline-block;
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: #c9a84c;
-    border: 1px solid #c9a84c44;
-    padding: 4px 16px;
     margin-bottom: 20px;
-    background: #0d0b06;
-  }
-
-  .q-number {
-    font-size: 12px;
-    color: #4a4030;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-
-  .q-text {
-    font-size: 20px;
-    line-height: 1.8;
-    color: #e8d5a3;
-    text-shadow: 0 0 20px #c9a84c22;
-    padding: 0 10px;
-  }
-
-  .options-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 32px;
-  }
-
-  .option-btn {
-    background: #0d0c09;
-    border: 1px solid #2a2218;
-    color: #a09070;
-    padding: 16px 24px;
-    text-align: left;
-    font-size: 15px;
-    line-height: 1.7;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.25s;
-    letter-spacing: 0.5px;
-    position: relative;
-    overflow: hidden;
-  }
-  .option-btn::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0;
-    width: 0; height: 100%;
-    background: linear-gradient(90deg, #c9a84c11, transparent);
-    transition: width 0.3s;
-  }
-  .option-btn:hover {
-    border-color: #c9a84c88;
-    color: #e8d5a3;
-    transform: translateX(4px);
-  }
-  .option-btn:hover::before { width: 100%; }
-  .option-btn.selected {
-    border-color: #c9a84c;
-    color: #c9a84c;
-    background: #1a1508;
-    box-shadow: 0 0 15px #c9a84c22;
-  }
-
-  .option-label {
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: #4a4030;
-    margin-right: 12px;
-    font-weight: 700;
-  }
-
-  .btn-next {
-    display: block;
-    width: 100%;
-    margin-top: 32px;
-    background: transparent;
-    border: 1px solid #c9a84c66;
-    color: #c9a84c;
-    padding: 14px;
-    font-size: 14px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s;
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  .btn-next.active {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .btn-next.active:hover {
-    background: #c9a84c11;
-    box-shadow: 0 0 20px #c9a84c33;
-  }
-
-  /* 分隔线 */
-  .divider {
-    width: 60px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #c9a84c, transparent);
-    margin: 20px auto;
-  }
-
-  /* 结果页 */
-  #result-page { display: none; }
-
-  .result-title {
-    text-align: center;
-    font-size: 13px;
-    letter-spacing: 4px;
-    color: #c9a84c;
-    margin-bottom: 8px;
-  }
-
-  .result-name {
-    text-align: center;
-    font-size: 36px;
-    font-weight: 700;
-    color: #e8d5a3;
-    letter-spacing: 6px;
-    text-shadow: 0 0 40px #c9a84c88;
-    margin-bottom: 4px;
-  }
-
-  .result-tag {
-    text-align: center;
-    font-size: 13px;
-    color: #6a5f45;
-    letter-spacing: 2px;
-    margin-bottom: 32px;
-  }
-
-  /* 雷达图容器 */
-  .radar-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto 40px;
-  }
-
-  /* 欲望排行 */
-  .ranking-title {
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: #c9a84c;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #2a2218;
-  }
-
-  .rank-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 14px;
-    gap: 12px;
-  }
-
-  .rank-num {
-    font-size: 11px;
-    color: #4a4030;
-    width: 20px;
-    letter-spacing: 1px;
-  }
-
-  .rank-name {
-    font-size: 14px;
-    color: #e8d5a3;
-    width: 60px;
-    letter-spacing: 1px;
-  }
-
-  .rank-bar-wrap {
-    flex: 1;
-    height: 6px;
-    background: #1a1810;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .rank-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #c9a84c, #e8d5a3);
-    box-shadow: 0 0 8px #c9a84c66;
-    transition: width 1s ease;
-  }
-
-  .rank-score {
-    font-size: 13px;
-    color: #c9a84c;
-    width: 36px;
-    text-align: right;
-    letter-spacing: 1px;
-  }
-
-  /* 主欲望解读 */
-  .main-desire-card {
-    background: #0d0c09;
-    border: 1px solid #2a2218;
-    border-left: 3px solid #c9a84c;
-    padding: 24px 28px;
-    margin: 32px 0;
-    position: relative;
-  }
-
-  .mdc-label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: #c9a84c;
-    margin-bottom: 12px;
-  }
-
-  .mdc-name {
-    font-size: 22px;
-    color: #e8d5a3;
-    letter-spacing: 4px;
-    margin-bottom: 16px;
-    text-shadow: 0 0 20px #c9a84c44;
-  }
-
-  .mdc-desc {
-    font-size: 14px;
-    color: #8a7a5a;
-    line-height: 2;
-    letter-spacing: 0.5px;
-  }
-
-  /* 组合解读 */
-  .combo-card {
-    background: #0d0c09;
-    border: 1px solid #1a1810;
-    padding: 20px 24px;
-    margin-bottom: 16px;
-  }
-
-  .combo-title {
-    font-size: 12px;
-    color: #c9a84c88;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-  }
-
-  .combo-text {
-    font-size: 13px;
-    color: #6a5f45;
-    line-height: 2;
-  }
-
-  /* 鸡汤段 */
-  .soul-card {
-    background: #0d0c09;
-    border: 1px solid #2a2218;
-    border-top: 3px solid #c9a84c44;
-    padding: 28px 28px 24px;
-    margin: 20px 0;
-  }
-
-  .soul-label {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: #c9a84c88;
-    margin-bottom: 16px;
-  }
-
-  .soul-quote {
-    font-size: 18px;
-    color: #c9a84c;
-    letter-spacing: 2px;
-    line-height: 1.9;
-    margin-bottom: 14px;
-    text-shadow: 0 0 20px #c9a84c33;
-    font-style: italic;
-  }
-
-  .soul-body {
-    font-size: 13px;
-    color: #6a5f45;
-    line-height: 2.1;
-    letter-spacing: 0.5px;
-  }
-
-  /* 保存图片按钮 */
-  .btn-save {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    margin-top: 32px;
-    background: linear-gradient(135deg, #c9a84c22, #8a6a2a22);
-    border: 1px solid #c9a84c66;
-    color: #c9a84c;
-    padding: 15px;
-    font-size: 14px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s;
-  }
-  .btn-save:hover {
-    background: linear-gradient(135deg, #c9a84c33, #8a6a2a33);
-    box-shadow: 0 0 20px #c9a84c33;
-  }
-
-  /* 微信引流 */
-  .wechat-card {
-    margin-top: 24px;
-    background: #0d0c09;
-    border: 1px solid #1a1810;
-    padding: 24px;
-    text-align: center;
-  }
-
-  .wechat-top {
-    font-size: 12px;
-    color: #4a4030;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-  }
-
-  .wechat-id {
+}
+.type-card .type-badge {
     display: inline-block;
-    font-size: 20px;
-    color: #c9a84c;
-    letter-spacing: 4px;
-    padding: 10px 24px;
-    border: 1px solid #c9a84c33;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
-  }
-  .wechat-id:hover {
-    background: #c9a84c11;
-    border-color: #c9a84c66;
-  }
+    background: linear-gradient(90deg, #f4d03f, #e67e22);
+    color: #1a0a2e;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+.type-card .type-title { font-size: 1.6em; font-weight: 700; color: #f4d03f; margin-bottom: 12px; }
+.type-card .type-desc { color: #d0d0e0; line-height: 1.9; font-size: 0.95em; margin-bottom: 8px; }
+.type-card .future-text {
+    margin-top: 18px; padding: 15px; background: rgba(0,0,0,0.2);
+    border-radius: 12px; font-size: 0.95em; line-height: 1.8; color: #e0e0f0; text-align: left;
+}
+.type-card .future-text strong { color: #f4d03f; }
+.indicator-section { margin-bottom: 24px; }
+.indicator-section h3 { color: #f4d03f; margin-bottom: 16px; font-size: 1.2em; text-align: center; }
+.indicator-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+.indicator-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; padding: 18px; transition: all 0.3s;
+}
+.indicator-card:hover { background: rgba(255,255,255,0.07); }
+.indicator-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.indicator-name { font-size: 1em; font-weight: 600; color: #f4d03f; }
+.indicator-score { font-size: 1.15em; font-weight: 700; color: #2ecc71; }
+.progress-bar { height: 5px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.indicator-content { font-size: 0.87em; line-height: 1.7; color: #b8b8d0; }
+.indicator-content .tag { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.73em; margin: 4px 4px 0 0; }
+.tag-tradition { background: rgba(244,208,63,0.12); color: #f4d03f; }
+.tag-science { background: rgba(46,204,113,0.12); color: #2ecc71; }
+.indicator-content .future-link {
+    display: block; margin-top: 10px; padding: 10px 12px;
+    background: rgba(244,208,63,0.08); border-left: 3px solid #f4d03f;
+    border-radius: 0 8px 8px 0; color: #e8e8f0; font-size: 0.95em;
+}
+.indicator-content .future-link strong { color: #f4d03f; }
+.model-status {
+    text-align: center; padding: 12px; margin-bottom: 16px; border-radius: 12px;
+    font-size: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+}
+.model-status.loaded { color: #4ade80; border-color: rgba(74,222,128,0.3); }
+.model-status.error { color: #f87171; border-color: rgba(248,113,113,0.3); }
+.review-thanks { display: none; margin-top: 12px; font-size: 18px; color: #f472b6; animation: fadeIn 0.5s ease; }
+.review-card.reviewed { border-color: rgba(244,114,182,0.5); }
+@media (max-width: 600px) {
+    .indicator-grid { grid-template-columns: 1fr; }
+    .container { padding: 24px 18px; border-radius: 22px; }
+    .header h1 { font-size: 26px; }
+    .score-value { font-size: 60px; }
+    .analysis-grid { grid-template-columns: 1fr; }
+}
 
-  .wechat-copy-tip {
-    font-size: 11px;
-    color: #c9a84c66;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-    transition: all 0.3s;
-  }
-
-  .wechat-desc {
-    font-size: 12px;
-    color: #3a3020;
-    letter-spacing: 1px;
-    line-height: 2;
-    margin-top: 8px;
-  }
-
-  .btn-retry {
-    display: block;
-    width: 100%;
-    margin-top: 16px;
-    background: transparent;
-    border: 1px solid #2a2218;
-    color: #4a4030;
-    padding: 14px;
-    font-size: 13px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.3s;
-  }
-  .btn-retry:hover {
-    border-color: #c9a84c44;
-    color: #c9a84c;
-  }
-
-  /* 加载动画 */
-  #loading-page {
-    display: none;
-    min-height: 100vh;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .loading-symbol {
-    font-size: 48px;
-    animation: spin 3s linear infinite;
-    margin-bottom: 24px;
-    filter: drop-shadow(0 0 20px #c9a84c);
-  }
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  .loading-text {
-    font-size: 13px;
-    letter-spacing: 4px;
-    color: #c9a84c;
-    animation: blink 1.5s ease-in-out infinite;
-  }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  /* 过渡动画 */
-  .fade-in {
-    animation: fadeIn 0.5s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
 </style>
 </head>
 <body>
-
-<!-- 粒子 -->
-<div id="particles"></div>
-
-<!-- 进度条 -->
-<div id="progress-bar-wrap">
-  <div id="progress-bar" style="width:0%"></div>
+<canvas id="particleCanvas"></canvas>
+<div class="page-wrapper"><div class="container">
+<div class="header"><h1>AI 全能颜值解析</h1>
+<p>五官魅力 / 脸型眉形唇形 / 人生剧本 / 明星撞脸 / 浓淡颜分析</p></div>
+<div class="model-status" id="modelStatus">⏳ AI模型加载中...</div>
+<div class="upload-section" id="uploadSection">
+<span class="upload-icon">📷</span>
+<div class="upload-text">点击上传或拖拽照片到这里</div>
+<div class="upload-hint">支持 JPG / PNG 格式，建议上传清晰的正面照</div>
+<div class="upload-buttons">
+<button class="upload-btn upload-btn-primary" id="pickBtn">选择照片</button>
+<button class="upload-btn upload-btn-secondary" id="camBtn">拍一张</button>
+</div></div>
+<input type="file" id="fileInput" accept="image/*">
+<input type="file" id="cameraInput" accept="image/*" capture="user">
+<div class="preview-section" id="previewSection">
+<div class="preview-container"><canvas id="previewCanvas"></canvas></div>
+<button class="analyze-btn" id="analyzeBtn">✨ 开始全能分析</button></div>
+<div class="loading" id="loadingSection">
+<div class="loading-ring"><svg viewBox="0 0 80 80"><defs><linearGradient id="loadG" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#a78bfa"/><stop offset="100%" style="stop-color:#f472b6"/></linearGradient></defs><circle class="bg" cx="40" cy="40" r="36"/><circle class="progress" id="loadProgress" cx="40" cy="40" r="36"/></svg>
+<div class="loading-percent" id="loadPercent">0%</div></div>
+<p class="loading-text" id="loadingText">AI 正在分析中...</p>
+<p class="loading-step" id="loadingStep"></p>
+<div class="loading-steps">
+<div class="step-item" id="step1"><span class="step-dot"></span>人脸检测</div>
+<div class="step-item" id="step2"><span class="step-dot"></span>五官定位</div>
+<div class="step-item" id="step3"><span class="step-dot"></span>特征分析</div>
+<div class="step-item" id="step4"><span class="step-dot"></span>综合评估</div>
+</div></div>
+<div class="results" id="results">
+<div class="score-card"><div class="score-label">综合颜值评分</div>
+<div class="score-value"><span id="totalScore">0</span><span class="unit"> 分</span></div>
+<div class="score-desc" id="scoreDesc"></div>
+<div class="score-stars" id="scoreStars"></div></div>
+<div class="type-card" id="lifeCard">
+<div class="type-badge" id="lifeBadge">你的人生剧本</div>
+<h2 class="type-title" id="lifeTitle"></h2>
+<p class="type-desc" id="lifeDesc"></p>
+<div class="future-text" id="lifeFuture"></div></div>
+<div class="celeb-match" id="celebSection"><h3>🌟 与你气质相近的美女类型</h3>
+<div class="celeb-list" id="celebList"></div></div>
+<div class="analysis-grid">
+<div class="analysis-card card-intensity"><h3><span class="card-icon">🎭</span> 浓颜 vs 淡颜</h3><div class="analysis-content" id="intensityResult"></div></div>
+<div class="analysis-card card-face"><h3><span class="card-icon">👤</span> 脸型分析</h3><div class="analysis-content" id="faceResult"></div></div>
+<div class="analysis-card card-brow"><h3><span class="card-icon">🖌️</span> 眉形分析</h3><div class="analysis-content" id="browResult"></div></div>
+<div class="analysis-card card-lip"><h3><span class="card-icon">👄</span> 唇形分析</h3><div class="analysis-content" id="lipResult"></div></div>
 </div>
-
-<div class="container">
-
-  <!-- 封面页 -->
-  <div id="cover-page">
-    <div class="cover-symbol">⚗</div>
-    <div class="cover-title">深层欲望测试器</div>
-    <div class="divider"></div>
-    <div class="cover-subtitle">
-      你以为你清楚自己想要什么<br>
-      实际上你只是压抑了它
-    </div>
-    <div class="cover-desc">
-      本测试将探测你10种深层欲望的强度分布<br>
-      共30题，每题没有对错<br>
-      <br>
-      色欲 · 食欲 · 贪欲 · 权欲 · 声欲<br>
-      占欲 · 触欲 · 命欲 · 法欲 · 逸欲
-    </div>
-    <button class="btn-start" onclick="startTest()">开始测试</button>
-  </div>
-
-  <!-- 题目页 -->
-  <div id="question-page">
-    <div class="q-header">
-      <div class="q-category" id="q-category">色欲</div>
-      <div class="q-number" id="q-number">第 1 题 / 共 30 题</div>
-      <div class="divider"></div>
-      <div class="q-text" id="q-text">题目内容</div>
-    </div>
-    <div class="options-wrap" id="options-wrap"></div>
-    <button class="btn-next" id="btn-next" onclick="nextQuestion()">下一题 →</button>
-  </div>
-
-  <!-- 加载页 -->
-  <div id="loading-page">
-    <div class="loading-symbol">◈</div>
-    <div class="loading-text">正在解读你的欲望结构...</div>
-  </div>
-
-  <!-- 结果页 -->
-  <div id="result-page">
-    <div class="result-title">你的深层欲望画像</div>
-    <div class="result-name" id="result-main-name"></div>
-    <div class="result-tag" id="result-main-tag"></div>
-    <div class="divider"></div>
-    <div class="radar-wrap">
-      <canvas id="radar-chart"></canvas>
-    </div>
-    <div class="ranking-title">欲望强度排行</div>
-    <div id="ranking-list"></div>
-    <div class="main-desire-card">
-      <div class="mdc-label">主欲望解读</div>
-      <div class="mdc-name" id="mdc-name"></div>
-      <div class="mdc-desc" id="mdc-desc"></div>
-    </div>
-    <div id="combo-section"></div>
-    <div id="soul-section"></div>
-    <button class="btn-save" onclick="saveImage()">📸 保存结果图片 · 分享给朋友</button>
-    <div class="wechat-card">
-      <div class="wechat-top">想要更多有趣测试？</div>
-      <div class="wechat-id" onclick="copyWechat()" id="wechat-id-text">xingzuofenxi1</div>
-      <div class="wechat-copy-tip" id="copy-tip">点击复制微信号</div>
-      <div class="wechat-desc">加微信 · 星座 / 性格 / 欲望 / 心理 · 更多测试持续更新</div>
-    </div>
-    <button class="btn-retry" onclick="retryTest()">重新测试</button>
-  </div>
-
-</div>
-
+<div class="radar-section"><h4>📊 五官详细评分</h4><div class="radar-container"><canvas id="radarChart" width="280" height="280"></canvas><div class="radar-legend" id="radarLegend"></div></div></div>
+<div class="indicator-section"><h3>🔮 30项面相指标详解</h3><div class="indicator-grid" id="indicatorGrid"></div></div>
+<div class="recommendation"><h4>🎯 专属变美方案</h4><ul id="recList"></ul></div>
+<div class="review-card" id="reviewCard">
+<div class="review-stars">⭐⭐⭐⭐⭐</div>
+<h3>觉得结果丰富吗？</h3><p>您的好评是我们持续优化的动力！</p>
+<button class="review-btn" id="reviewBtn">👍 给个好评</button>
+<div class="review-thanks" id="reviewThanks" style="display:none">❤️ 感谢您的支持！</div></div>
+<div class="action-bar">
+<button class="action-btn btn-restart" id="restartBtn">🔄 重新测试</button>
+<button class="action-btn btn-share" id="shareBtn">📤 分享结果</button>
+</div></div></div></div>
+<div class="toast" id="toast"></div>
 <script>
-// ============ 粒子 ============
-(function() {
-  const container = document.getElementById('particles');
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (8 + Math.random() * 12) + 's';
-    p.style.animationDelay = (Math.random() * 15) + 's';
-    p.style.width = p.style.height = (1 + Math.random() * 2) + 'px';
-    container.appendChild(p);
-  }
-})();
+// ==================== 粒子背景 ====================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
 
-// ============ 题目数据 ============
-const CATEGORIES = [
-  { key: 'se',   name: '色欲', color: '#c9a84c' },
-  { key: 'shi',  name: '食欲', color: '#c9a84c' },
-  { key: 'tan',  name: '贪欲', color: '#c9a84c' },
-  { key: 'quan', name: '权欲', color: '#c9a84c' },
-  { key: 'sheng',name: '声欲', color: '#c9a84c' },
-  { key: 'zhan', name: '占欲', color: '#c9a84c' },
-  { key: 'chu',  name: '触欲', color: '#c9a84c' },
-  { key: 'ming', name: '命欲', color: '#c9a84c' },
-  { key: 'fa',   name: '法欲', color: '#c9a84c' },
-  { key: 'yi',   name: '逸欲', color: '#c9a84c' },
-];
-
-const QUESTIONS = [
-  // 色欲 × 3
-  { cat: 'se', text: '路上遇见一个非常好看的人，你的第一反应是什么？',
-    options: ['试图记住他/她的每一个细节', '多看了几眼，但很快收回视线', '觉得好看，但很快忘了', '几乎没注意'] },
-  { cat: 'se', text: '你刷到异常好看的人的照片，会怎么做？',
-    options: ['截图收藏，反复看', '点个赞，然后刷走', '看一秒，继续刷', '根本不在意颜值'] },
-  { cat: 'se', text: '一个场合里，你最先注意到的是什么？',
-    options: ['谁最好看，谁最有吸引力', '氛围和场景', '有没有认识的人', '离场最近的出口'] },
-
-  // 食欲 × 3
-  { cat: 'shi', text: '你压力大的时候，最先想做的是什么？',
-    options: ['吃点好的犒劳自己', '找人说话', '睡觉', '发呆什么都不想'] },
-  { cat: 'shi', text: '你对食物的态度是？',
-    options: ['吃是一种仪式，不好吃我宁愿不吃', '吃饱就行，凑合过', '随便，饿了再说', '经常忘记吃饭'] },
-  { cat: 'shi', text: '在你心里，和喜欢的人吃饭是什么感觉？',
-    options: ['比食物本身更重要，是一种占有', '普通，但温暖', '不如自己一个人吃', '没想过这个问题'] },
-
-  // 贪欲 × 3
-  { cat: 'tan', text: '看见别人有好东西，你的内心反应是？',
-    options: ['我也要有，最好比他的更好', '欣赏一下，然后回来看自己有什么', '替他高兴', '没什么感觉'] },
-  { cat: 'tan', text: '得到一样东西之后，你通常会？',
-    options: ['马上想要下一个', '满足一段时间，再慢慢想要别的', '珍惜手里的', '扔在一边很快忘了'] },
-  { cat: 'tan', text: '你对"够了"这个词的感受是？',
-    options: ['从来没有真正觉得够了', '偶尔够，但很快又不够', '比较容易满足', '很少有强烈的欲望'] },
-
-  // 权欲 × 3
-  { cat: 'quan', text: '在一个群体里，你对自己的位置在意吗？',
-    options: ['非常在意，必须是说话算数的那个', '有点在意，但不会强求', '无所谓排在哪', '更喜欢待在边缘'] },
-  { cat: 'quan', text: '当你的想法被否定，你会怎样？',
-    options: ['内心不服，一定要证明自己是对的', '沉默，但会找机会验证', '接受对方意见', '懒得再说'] },
-  { cat: 'quan', text: '你喜欢安排别人还是被别人安排？',
-    options: ['我来安排，这样最放心', '都行，但如果我安排会更好', '被安排就好，少操心', '两者都不喜欢'] },
-
-  // 声欲 × 3
-  { cat: 'sheng', text: '有人用特别好听的声音对你说话，你会？',
-    options: ['全身都松了，说什么都愿意听', '觉得好听，但不至于失去判断', '注意内容，不在意声音', '没特别感受'] },
-  { cat: 'sheng', text: '你喜欢什么样的环境？',
-    options: ['有点背景声，白噪音或音乐，安静但不死寂', '完全安静', '热闹嘈杂都无所谓', '越安静越难受'] },
-  { cat: 'sheng', text: '你在意别人说话的方式吗？',
-    options: ['非常在意，语气和音调能直接影响我的情绪', '有点在意，但不决定性', '只看内容', '都无所谓'] },
-
-  // 占欲 × 3
-  { cat: 'zhan', text: '你在乎的人跟别人走得近，你会？',
-    options: ['心里不舒服，想把那个人从他们之间抽走', '观察一下，如果觉得没威胁就算了', '祝他们开心', '根本不在意'] },
-  { cat: 'zhan', text: '你喜欢别人用什么方式对待你？',
-    options: ['只有我，任何时候优先级都是我', '重要时刻记得我就够', '平等对待所有人就好', '我不想成为负担'] },
-  { cat: 'zhan', text: '你有没有想把某人"圈"起来的冲动？',
-    options: ['有，我想要的人最好只活在我视野里', '偶尔会有，但理智压住了', '不会，这样太累', '完全没有这种想法'] },
-
-  // 触欲 × 3
-  { cat: 'chu', text: '你对肢体接触的感受是？',
-    options: ['非常敏感，喜欢的人碰一下我都能记很久', '喜欢，但不执着', '可有可无', '不太喜欢被触碰'] },
-  { cat: 'chu', text: '压力大的时候，你最想要的是？',
-    options: ['有个人抱着我，什么都不用说', '说说话就好', '自己安静待着', '睡一觉解决'] },
-  { cat: 'chu', text: '你对物品的质感在意吗？',
-    options: ['非常在意，摸上去必须舒服', '有点在意', '不太在意', '完全无所谓'] },
-
-  // 命欲 × 3
-  { cat: 'ming', text: '你相信命运吗？',
-    options: ['相信，而且想知道自己的命是什么', '有点信，但更相信努力', '不太信', '完全不信'] },
-  { cat: 'ming', text: '你有没有想"掌控命运走向"的冲动？',
-    options: ['一直有，我不想被安排，想自己决定一切', '希望自己能多影响一些', '顺其自然', '没有，累'] },
-  { cat: 'ming', text: '你如何看待"天注定"这件事？',
-    options: ['既然注定，我要知道注定的是什么，然后提前布局', '一部分接受，一部分抗争', '随遇而安', '不想这么复杂的问题'] },
-
-  // 法欲 × 3
-  { cat: 'fa', text: '你对规则和禁忌的态度是？',
-    options: ['越不能的越想碰，禁忌对我有吸引力', '尊重规则，但会在边界上试探', '守规则，不惹麻烦', '规则越多越让我窒息'] },
-  { cat: 'fa', text: '你喜欢的体验是？',
-    options: ['有点危险感、刺激感的，才叫活着', '在安全范围内的刺激', '稳定平静的生活', '越舒适越好'] },
-  { cat: 'fa', text: '你对"肉体感知"的敏感程度是？',
-    options: ['非常敏感，一点刺激都能放大很多倍', '比较敏感', '普通', '相对迟钝，不太在意'] },
-
-  // 逸欲 × 3
-  { cat: 'yi', text: '你理想中的一天是什么样的？',
-    options: ['什么都不做，只是躺着，完全放空', '做一点自己喜欢的事，不被打扰', '有一些安排但不赶时间', '充实忙碌才算没浪费'] },
-  { cat: 'yi', text: '别人叫你"废物"或"懒虫"，你会？',
-    options: ['无所谓，我享受我的状态', '有点介意，但懒得解释', '会认真反思', '完全接受不了这个评价'] },
-  { cat: 'yi', text: '你对"无所事事"的感受是？',
-    options: ['那是我向往的最高境界', '偶尔需要，时间长了会无聊', '空下来就焦虑', '闲不住，必须有事做'] },
-];
-
-// ============ 分数权重 ============
-// 每题4个选项分别对应 [4, 3, 2, 1] 分
-const SCORE_MAP = [4, 3, 2, 1];
-
-// ============ 主欲望描述 ============
-const DESIRE_DESC = {
-  se: {
-    name: '色欲',
-    tag: '你的眼睛是最诚实的欲望入口',
-    desc: '你对美有本能的反应，好看的东西会在你脑子里留很久。这不只是浅层的视觉享受——你对外表、轮廓、气质有超乎常人的感知力。这种欲望让你在人群中总能第一眼找到最值得注意的人，也让你有时候会被美所困，走不开。'
-  },
-  shi: {
-    name: '食欲',
-    tag: '你用吃来感知这个世界是否值得活',
-    desc: '对你来说，吃不只是填饱肚子。一顿好吃的可以修复很多东西，一顿难吃的可以让心情崩掉。你通过食物感受安全感、被爱感、以及对生活的掌控感。当你说"想吃点好的"的时候，你真正想要的是被安慰。'
-  },
-  tan: {
-    name: '贪欲',
-    tag: '你永远无法被满足，但这也是你的动力',
-    desc: '你有一种持续向外扩张的欲望。得到了还想要更多，不是贪婪，是一种生命力旺盛的表现。你很难在一个地方停下来，总觉得前面还有更好的，更大的，更值得的。这种欲望推着你走，也让你很难真正满足。'
-  },
-  quan: {
-    name: '权欲',
-    tag: '你天生需要掌握局面，不然心里不安',
-    desc: '你对秩序和控制权有强烈需求。不是要欺压别人，而是不被控制、不被安排、不被无视。你喜欢自己说了算，喜欢事情按你预想的走。当局面失控时，你的第一反应是找回主动权，而不是接受安排。'
-  },
-  sheng: {
-    name: '声欲',
-    tag: '声音是你最难防守的感官漏洞',
-    desc: '你对声音有极高的敏感度。对的声音能让你卸下全部防备，不对的声音会让你浑身不舒服。你可能会因为一个人说话的方式喜欢上他，也可能因为噪音而整个人崩溃。声音是你和世界之间最细腻的连接。'
-  },
-  zhan: {
-    name: '占欲',
-    tag: '你爱的方式是：你是我的',
-    desc: '你有强烈的归属需求——不只是你属于对方，而是对方属于你。你喜欢的东西，喜欢的人，你希望在心里划一个圈，说"这是我的"。这种欲望在亲密关系里尤为明显。你不太能接受"大家共享"，你想要独属。'
-  },
-  chu: {
-    name: '触欲',
-    tag: '你的皮肤比你的大脑更诚实',
-    desc: '你对触觉高度敏感，好的触碰能让你彻底放松，不好的触碰会让你难受很久。你在亲密关系里格外需要肢体接触，这是你感受对方是否真实在乎你的方式。当你压力大的时候，你需要的不是道理，而是一个拥抱。'
-  },
-  ming: {
-    name: '命欲',
-    tag: '你想知道自己这一生的底牌',
-    desc: '你对命运有一种既想看清楚又想亲自改写的矛盾感。你会看星盘、测八字，不是迷信，而是想找到某种"提前知道"的安全感。你不甘心只是顺着走，但你也想先知道路在哪，再决定要不要拐弯。'
-  },
-  fa: {
-    name: '法欲',
-    tag: '禁忌是你的加速器',
-    desc: '你对"不能"这两个字有天然的好奇心和冲动。越是被禁止的，越让你想碰。你的感知力非常强，对于刺激、张力、边界感都极其敏锐。这种欲望让你在亲密关系里有强大的感染力，也让你难以被平淡的生活满足。'
-  },
-  yi: {
-    name: '逸欲',
-    tag: '你只是想好好休息，人生已经很累了',
-    desc: '你对安逸的渴望不是懒，是你的内在需要大量的放空来自我修复。你对无意义的忙碌有天然的抵触，你知道什么对你真正重要，其他的都是噪音。你追求的不是什么都不做，而是不被强迫做你不想做的事。'
-  }
-};
-
-// ============ 鸡汤段文案 ============
-const SOUL_DESC = {
-  se: {
-    quote: '好色，是对美最原始的信仰',
-    body: '世人说“好色”是缺点，但真相是：对美有强烈感知的人，内心往往更丰盈。你的目光能看见别人的光，是因为你没有把生命里每一个流动的美封死。一个对美麻木的人，他不是在控制自己，他只是不再能感受了。对美保持现实的感受，不是弱点，这是一种资质。'
-  },
-  shi: {
-    quote: '食欲旺盛的人，对人生从来不轻言放弃',
-    body: '能为一顿饭动心的人，往往比别人更懂得“活着”是什么意思。你不吨小事，不错过当下。世界上最好吃的餐厅，都需要一心期待的人来擭开它的味道。没有食欲的人，大概也很难对任何事真心投入。你的食欲，不是贪心，是对生活一直存有热情的证明。'
-  },
-  tan: {
-    quote: '贪心，是人类最老实的前进动力',
-    body: '没有人天生就满足。那些说“知足常乐”的人，要么已经得到了很多，要么还没开始想要。你的贪心不是罪恶，是你对这个世界还有信号。一个什么都想要的人，能走到的地方永远比岗在原地的人远。欲望不是问题，欲望指向哪里，才是人生的分水岭。'
-  },
-  quan: {
-    quote: '想控制局面的人，是因为见过太多失控的代价',
-    body: '权欲被諱太久了。一个尝试掌控局面的人，并不是要统治别人，而是就是不愿被安排、不愿被忽视。一个从来不想权力的人，往往也就一直在被别人安排着。你的权欲不是对人的欲望，是对秩序的信仰——你相信事情如果由你来安排，会变得更好。这种相信本身，就已经是一种力量了。'
-  },
-  sheng: {
-    quote: '声音进入人体的方式，比任何语言都直接',
-    body: '你对声音的敏感，说明你能感受到别人感受不到的东西。很多人听到的是话的内容，你听到的是一个人说话时流露的情绪、隐藏的紧张和轻松。这不是过于敏感，是一种听觉上的精准。世界太多噪音，你有能力分辨真实信号，这是真实的才能。'
-  },
-  zhan: {
-    quote: '占有欲强烈的人，贫乏的是边界感，不是心',
-    body: '人们总说占有欲是糟糕的。但有多少人，是因为在最重要的关系里被忘记、被轻视，才学会採紧的。你的占有欲后面，是一种深度的在意。不在乎的人也不会要求占有。只有真正想要一个人的时候，才会想把他留在身边。这种想要不是控制，是一种非常灵活的忠诚。'
-  },
-  chu: {
-    quote: '皮肤的记忆，比大脑更长久',
-    body: '触欲强烈的人不是诞求无度，是对联结、安全、具身情感的渴望。一个拉住手的动作，小到可能不进任何日记，但它留在身体里的时间，有时会比一段话还要久。你不是难哄的人，你只是需要用真实的躲体接触，来确认对方是否真实在场。'
-  },
-  ming: {
-    quote: '想懂天命的人，是因为不愿白费了这一生',
-    body: '关心命运的人，并不是迷信。星盘、八字、占卜，它们在不同时代用不同的语言说着同一件事：我这一生有没有意义，我的尽头将在哪里。你看不透的不是天机，是自己。一个尝试看清自己命运的人，内心深处一定有个声音在说：我想活得不同。'
-  },
-  fa: {
-    quote: '禁忧强烈的人，是因为不愿用麻木换取安全感',
-    body: '法欲强烈的人往往比别人多拥有了更多的生命力。对于张力、边界感、心跳加速的瞬间，不管别人怎么也不如你感受的深切。那不是冲动，是一种明看警惕的旺盛。你就是不愿意用“要敢不要”来换取安全感，这种选择本身，就已经是一种勇气。'
-  },
-  yi: {
-    quote: '安逸，是一种人生观，不是想象力的缺失',
-    body: '能感受到“什么都不做也很好”的人，内心一定极其丰盈。不是没有目标，是你的目标里不包含“不停啦”——这已经是一种成熟的生命观。很多人一生忙忙础础，最后发现自己居然从来没有到达自己真正想要的地方。你步伐放缓，不是犯懒，是因为你明白大力安排和目标之间不必然正相关。'
-  }
-};
-
-let currentQ = 0;
-let answers = {};
-let scores = {};
-let radarChart = null;
-
-// ============ 初始化 ============
-function initScores() {
-  CATEGORIES.forEach(c => scores[c.key] = 0);
-}
-
-function startTest() {
-  initScores();
-  currentQ = 0;
-  answers = {};
-  document.getElementById('cover-page').style.display = 'none';
-  document.getElementById('question-page').style.display = 'block';
-  renderQuestion();
-}
-
-function renderQuestion() {
-  const q = QUESTIONS[currentQ];
-  const cat = CATEGORIES.find(c => c.key === q.cat);
-
-  document.getElementById('q-category').textContent = cat.name;
-  document.getElementById('q-number').textContent = `第 ${currentQ + 1} 题 / 共 ${QUESTIONS.length} 题`;
-  document.getElementById('q-text').textContent = q.text;
-
-  const wrap = document.getElementById('options-wrap');
-  wrap.innerHTML = '';
-  const labels = ['A', 'B', 'C', 'D'];
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn';
-    btn.innerHTML = `<span class="option-label">${labels[i]}</span>${opt}`;
-    if (answers[currentQ] === i) btn.classList.add('selected');
-    btn.onclick = () => selectOption(i);
-    wrap.appendChild(btn);
-  });
-
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = currentQ === QUESTIONS.length - 1 ? '查看结果 →' : '下一题 →';
-  if (answers[currentQ] !== undefined) {
-    nextBtn.classList.add('active');
-  } else {
-    nextBtn.classList.remove('active');
-  }
-
-  updateProgress();
-  document.getElementById('question-page').classList.add('fade-in');
-  setTimeout(() => document.getElementById('question-page').classList.remove('fade-in'), 500);
-}
-
-function updateProgress() {
-  const pct = ((currentQ) / QUESTIONS.length) * 100;
-  document.getElementById('progress-bar').style.width = pct + '%';
-}
-
-function selectOption(idx) {
-  answers[currentQ] = idx;
-  document.querySelectorAll('.option-btn').forEach((btn, i) => {
-    btn.classList.toggle('selected', i === idx);
-  });
-  document.getElementById('btn-next').classList.add('active');
-}
-
-function nextQuestion() {
-  if (answers[currentQ] === undefined) return;
-
-  // 计分
-  const q = QUESTIONS[currentQ];
-  scores[q.cat] += SCORE_MAP[answers[currentQ]];
-
-  if (currentQ < QUESTIONS.length - 1) {
-    currentQ++;
-    renderQuestion();
-  } else {
-    showLoading();
-  }
-}
-
-function showLoading() {
-  document.getElementById('question-page').style.display = 'none';
-  const lp = document.getElementById('loading-page');
-  lp.style.display = 'flex';
-  document.getElementById('progress-bar').style.width = '100%';
-  setTimeout(showResult, 2000);
-}
-
-function showResult() {
-  document.getElementById('loading-page').style.display = 'none';
-  const rp = document.getElementById('result-page');
-  rp.style.display = 'block';
-  rp.classList.add('fade-in');
-
-  // 找主欲望
-  let sorted = CATEGORIES.map(c => ({ ...c, score: scores[c.key] }))
-    .sort((a, b) => b.score - a.score);
-
-  const main = sorted[0];
-  const second = sorted[1];
-  const desc = DESIRE_DESC[main.key];
-
-  document.getElementById('result-main-name').textContent = desc.name;
-  document.getElementById('result-main-tag').textContent = desc.tag;
-  document.getElementById('mdc-name').textContent = desc.name;
-  document.getElementById('mdc-desc').textContent = desc.desc;
-
-  // 渲染排行
-  const rankList = document.getElementById('ranking-list');
-  rankList.innerHTML = '';
-  const maxScore = sorted[0].score;
-  sorted.forEach((item, i) => {
-    const pct = Math.round((item.score / maxScore) * 100);
-    const div = document.createElement('div');
-    div.className = 'rank-item';
-    div.innerHTML = `
-      <span class="rank-num">0${i+1}</span>
-      <span class="rank-name">${item.name}</span>
-      <div class="rank-bar-wrap">
-        <div class="rank-bar" style="width:0%" data-pct="${pct}"></div>
-      </div>
-      <span class="rank-score">${item.score}</span>
-    `;
-    rankList.appendChild(div);
-  });
-  setTimeout(() => {
-    document.querySelectorAll('.rank-bar').forEach(bar => {
-      bar.style.width = bar.dataset.pct + '%';
-    });
-  }, 100);
-
-  // 组合解读
-  const comboSection = document.getElementById('combo-section');
-  comboSection.innerHTML = '';
-  const combo = getComboDesc(main.key, second.key);
-  if (combo) {
-    comboSection.innerHTML = `
-      <div class="combo-card">
-        <div class="combo-title">欲望组合解读 · ${main.name} × ${second.name}</div>
-        <div class="combo-text">${combo}</div>
-      </div>
-    `;
-  }
-
-  // 鸡汤段
-  const soulSection = document.getElementById('soul-section');
-  const soul = SOUL_DESC[main.key];
-  if (soul) {
-    soulSection.innerHTML = `
-      <div class="soul-card">
-        <div class="soul-label">欲望与你</div>
-        <div class="soul-quote">“${soul.quote}”</div>
-        <div class="soul-body">${soul.body}</div>
-      </div>
-    `;
-  }
-
-  // 雷达图
-  renderRadar(sorted);
-}
-
-function renderRadar(sorted) {
-  const labels = sorted.map(s => s.name);
-  const data = sorted.map(s => s.score);
-  const ctx = document.getElementById('radar-chart').getContext('2d');
-
-  if (radarChart) radarChart.destroy();
-
-  radarChart = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: data,
-        backgroundColor: 'rgba(201, 168, 76, 0.15)',
-        borderColor: '#c9a84c',
-        borderWidth: 2,
-        pointBackgroundColor: '#c9a84c',
-        pointBorderColor: '#0a0a0f',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        r: {
-          min: 0,
-          max: 12,
-          ticks: {
-            display: false,
-            stepSize: 3
-          },
-          grid: { color: '#2a2218' },
-          angleLines: { color: '#2a2218' },
-          pointLabels: {
-            color: '#8a7a5a',
-            font: { size: 12, family: 'SimSun' }
-          }
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-      }
+
+        function createParticles() {
+            particles = [];
+            const count = Math.floor((canvas.width * canvas.height) / 15000);
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    r: Math.random() * 2 + 0.5,
+                    color: `hsla(${260 + Math.random() * 60}, 70%, 70%, ${0.15 + Math.random() * 0.25})`
+                });
+            }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            });
+
+            // 连线
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(167, 139, 250, ${0.06 * (1 - dist / 120)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(drawParticles);
+        }
+
+        resizeCanvas();
+        createParticles();
+        drawParticles();
+        window.addEventListener('resize', () => { resizeCanvas(); createParticles(); });
+
+        
+const browTypes = {
+            wild: { name: "野生眉", desc: "毛发根根分明，还原原生眉毛的蓬松杂乱感，自带原生氛围感。", features: "毛流感强，眉毛蓬松自然，根根分明", matchFace: ["骨相立体的脸型"], suggestion: "野生眉重在保留原生感！只需修掉多余杂毛，用眉梳顺着毛流梳理，透明眉胶定型。" },
+            willow: { name: "柳叶眉", desc: "线条纤细弯曲如柳叶，古典温柔，可柔和脸部棱角。", features: "眉头较细，弧度平滑，眉尾自然收尖", matchFace: ["鹅蛋脸", "瓜子脸"], suggestion: "用眉笔沿生长方向轻描，细头眉笔勾勒眉尾弧度，保持弧线流畅。" },
+            flat: { name: "平眉", desc: "线条平直硬朗，弱化纵向比例，自带干练气场。", features: "眉头到眉尾水平，无明显眉峰", matchFace: ["长脸"], suggestion: "眉头轻描，中段均匀填充，上下边缘平行，用眉粉更自然。" },
+            drooping: { name: "落尾眉", desc: "眉头高挑，眉尾自然下落，自带无辜感。", features: "眉头位置略高，眉尾走势向下", matchFace: ["菱形脸"], suggestion: "眉尾最低点不低于眉头，从眉头往后自然过渡。" },
+            sword: { name: "剑眉", desc: "眉形如剑，逐渐上扬，线条锋利有力，英气十足。", features: "眉头粗壮，眉尾上扬变细，眉峰锐利", matchFace: ["方脸", "国字脸"], suggestion: "保持上扬走势，眉头用眉粉自然晕开，眉尾利落收尖。" },
+            arched: { name: "弯月眉", desc: "弧度如弯月般优雅，最百搭的眉形之一。", features: "眉峰位于2/3处，弧度圆润，眉尾微下收", matchFace: ["方脸", "圆脸", "各种脸型"], suggestion: "保持弧度对称，眉峰不要过尖，眉峰到眉尾平滑过渡。" },
+            peaked: { name: "挑眉", desc: "眉峰高挑明显，凌厉精明，适合强气场妆容。", features: "眉峰角度大位置高，眉尾下落明显", matchFace: ["圆脸", "短脸"], suggestion: "日常可用眉粉填充眉峰下方三角区域柔化，想凌厉就加强眉峰。" }
+        };
+const browFaceMatch = {
+            '直面型': { '柳叶眉': 92, '弯月眉': 93, '野生眉': 88, '平眉': 85, '剑眉': 90, '落尾眉': 86, '挑眉': 87 },
+            '微凸面型': { '柳叶眉': 93, '弯月眉': 91, '野生眉': 85, '平眉': 82, '剑眉': 80, '落尾眉': 88, '挑眉': 83 },
+            '丰润型面型': { '柳叶眉': 90, '弯月眉': 92, '野生眉': 80, '平眉': 75, '剑眉': 82, '落尾眉': 78, '挑眉': 88 },
+            '微凹面型': { '柳叶眉': 85, '弯月眉': 88, '野生眉': 90, '平眉': 86, '剑眉': 87, '落尾眉': 82, '挑眉': 84 },
+            '柔和型面型': { '柳叶眉': 86, '弯月眉': 89, '野生眉': 91, '平眉': 84, '剑眉': 85, '落尾眉': 83, '挑眉': 82 },
+            '立体型面型': { '柳叶眉': 78, '弯月眉': 83, '野生眉': 93, '平眉': 76, '剑眉': 92, '落尾眉': 80, '挑眉': 88 }
+        };
+const lipTypes = {
+            mPetal: {
+                name: "M唇/花瓣唇",
+                desc: "唇峰明显呈M形，上唇像花瓣一样有弧度，精致甜美。这是公认的'教科书级'唇形，M形唇峰让上唇如雕刻般精致，两峰之间形成优美的唇弓凹陷。上唇的花瓣弧度配合饱满下唇，不笑时就有一种甜美端庄感，微微张嘴更显精致。很多人做唇部整形追求的就是这种天然M形弧线。",
+                features: "唇峰M形弧度明显，上唇如花瓣般精致有弧度，唇弓线条清晰对称，唇珠自然凸起于两峰之间，下唇圆润饱满",
+                ratio: "上下唇厚度约 1:1.3，上唇弧度感强",
+                aura: "精致甜美、高定妆感、天然教科书唇形",
+                celebRef: "异域浓颜型、古典仙气型、混血甜心同款唇形",
+                matchFace: ["标准脸型", "鹅蛋脸", "立体脸型"],
+                colorRec: "正红色、玫瑰红最能展现唇峰轮廓；日常选豆沙色、蜜桃色也很甜美",
+                suggestion: "M唇/花瓣唇是天生的精致唇形！画唇妆时沿天然唇峰精准描绘，不需模糊唇线。哑光质地最能突显唇峰M形轮廓，水光质地则更强调花瓣般的甜美感。唇中央可叠涂浅色增加立体度。"
+            },
+            smile: {
+                name: "微笑唇",
+                desc: "嘴角自然微微上扬，不笑也像在笑，亲和力强。微笑唇让整张脸永远带着温暖的表情，给人天生乐观开朗的印象。即使放松状态下嘴角也有2-3mm的自然上翘，这种'天然微笑'让你在人群中格外讨喜。笑起来弧度更大感染力十足，是社交场合的天然加分项。",
+                features: "嘴角天然上翘约2-3mm，唇线末端自然上扬，唇弓弧度柔和舒展，上唇略呈弓形，嘴角处有自然上提弧线",
+                ratio: "上下唇厚度约 1:1.3，嘴角区域唇线上扬",
+                aura: "亲和力满分、天生好人缘、甜美阳光",
+                celebRef: "韩系甜妹型、清纯邻家型、日系甜笑型同款唇形",
+                matchFace: ["各种脸型", "尤其适合圆脸和甜美风"],
+                colorRec: "蜜桃色、西柚色、元气橘色等活力暖色系",
+                suggestion: "微笑唇是天生的好人缘唇形！唇妆以自然为主，薄涂水光唇釉就很好看。不需强调唇线，模糊边界的'咬唇妆'和你最配。嘴角偶尔下垂时可用遮瑕提亮嘴角，搭配苹果肌腮红甜美值拉满。"
+            },
+            cherry: {
+                name: "樱桃唇",
+                desc: "唇形小巧饱满，上下唇都偏圆润，可爱减龄。嘴巴整体面积偏小但轮廓圆润饱满像一颗成熟的樱桃，唇珠圆润突出，唇峰弧度柔和不尖锐，天然带着楚楚可人的精致感。不涂口红时唇色也偏红润，笑起来唇部弧度甜美，自带可爱减龄buff。",
+                features: "唇形偏小但饱满圆润，上下唇比例均匀，唇珠圆润明显，唇峰弧度柔和，整体呈小巧圆润形态",
+                ratio: "上下唇厚度约 1:1.2，整体偏小巧饱满",
+                aura: "可爱减龄、精致甜美、少女感十足",
+                celebRef: "甜系少女型、清冷美人型同款唇形",
+                matchFace: ["鹅蛋脸", "瓜子脸", "小巧精致脸型"],
+                colorRec: "水红色、草莓色、蜜桃色等清透亮色系",
+                suggestion: "樱桃唇天生精致可爱！用唇釉打造水光果冻质感最佳。唇线保持自然模糊，唇珠处点涂高光或浅色唇蜜增加立体感。避免深色哑光唇膏会显嘴小且老气，想放大唇形可在唇中央叠涂提亮。"
+            },
+            oval: {
+                name: "鹅蛋唇/椭圆唇",
+                desc: "唇峰不尖锐，整体偏椭圆，线条柔和，温柔耐看。没有过于明显的棱角和转折，上下唇线条都呈柔和的椭圆弧线，给人温润如玉的感觉。这种唇形非常耐看，远看温柔大方近看细节舒服。因为线条没有攻击性，百搭各种妆容风格，是化妆师最喜欢的'画布型'唇形。",
+                features: "唇峰圆润不尖锐，整体呈柔和椭圆形，上下唇弧度平滑过渡，唇线柔和无明显转折，嘴角收束自然",
+                ratio: "上下唇厚度约 1:1.2，整体线条圆润均匀",
+                aura: "温柔耐看、知性大方、百搭万能",
+                celebRef: "温婉知性型、岁月静好型、文艺女神同款唇形",
+                matchFace: ["各种脸型", "尤其适合柔和面型和鹅蛋脸"],
+                colorRec: "豆沙色、玫瑰色、奶茶色等温柔色系；也能驾驭姨妈红等气场色",
+                suggestion: "鹅蛋唇是最百搭的唇形！任何唇色和质地都能驾驭。日常温柔路线选豆沙色/奶茶色，气场路线选正红色/梅子色。顺着天然唇线画即可，不需刻意改变唇形，你的唇形本身已经很完美。"
+            },
+            thick: {
+                name: "厚唇/欧美唇",
+                desc: "上下唇都饱满，存在感强，性感大气。厚唇在国际审美中是高级感和性感的象征，饱满唇部让整张脸更有张力和表现力。自带一种慵懒又强势的气场，不涂口红就已经很有存在感。微微嘟起时性感指数爆表，大笑时又有豪爽的感染力。很多国际超模和好莱坞女星都是这种唇形。",
+                features: "上下唇均饱满厚实，唇部面积较大，唇线圆润明显，唇珠不突出但整体丰盈感强，嘴角线条大气",
+                ratio: "上下唇厚度约 1:1.2，整体偏厚丰满",
+                aura: "性感大气、国际超模感、高辨识度",
+                celebRef: "性感大气型、国际范御姐型、高级氛围型同款唇形",
+                matchFace: ["大气脸型", "立体脸型", "轮廓感强的脸型"],
+                colorRec: "日常选裸粉色、肉桂色、脏橘色弱化存在感；想高调选正红色、酒红色",
+                suggestion: "厚唇/欧美唇天生高级性感！日常想低调可选哑光质地+低饱和色系降低膨胀感，用遮瑕轻拍唇外缘缩小轮廓。想走性感路线就大胆用正红色或酒红色，你的唇形撑得住任何浓烈色彩。"
+            },
+            thin: {
+                name: "薄唇",
+                desc: "唇瓣偏薄，唇线清晰，清冷、高级、有气质。薄唇自带克制与禁欲感，线条利落干净给人精明干练的印象。不需过多修饰就很有'高冷系'气质，配合坚定的眼神有一种不动声色的强大气场。在东亚审美中，薄唇代表理性与高级感，是很多'天花板'级美女的标配。",
+                features: "唇部面积偏小，上下唇均偏薄，唇线清晰利落，唇峰平缓，嘴角线条干净，整体呈精致扁平弧线",
+                ratio: "上下唇厚度约 1:1，整体偏薄",
+                aura: "清冷高级、禁欲气质、干练知性",
+                celebRef: "超模高级型、骨相完美型、灵气俏皮型同款唇形",
+                matchFace: ["精致小脸", "骨感脸型", "高级感脸型"],
+                colorRec: "饱满亮色系如水红色、珊瑚色、浆果色增加唇部存在感",
+                suggestion: "薄唇自带高级利落感！想增加饱满度：用唇线笔沿唇外缘0.5mm轻描轮廓，选水光/镜面质地唇釉增加丰盈视觉。唇珠处重点叠涂浅色，'中央深两边浅'的渐变画法效果最好。睡前厚涂唇膜养出水润薄唇更高级。"
+            },
+            pouty: {
+                name: "嘟嘟唇",
+                desc: "下唇饱满圆润，唇珠明显，幼态、显嫩。嘟嘟唇让整张脸充满胶原蛋白的青春感，是'幼态脸'的标配唇形。下唇的饱满圆润搭配突出的唇珠，天然带有无辜又可爱的嘟嘟感。不经意嘟嘴时特别可爱，笑起来嘴唇的圆润弧度更是减龄利器，是满满胶原蛋白的象征。",
+                features: "下唇饱满圆润外翻，唇珠突出明显，唇部整体有嘟起的立体感，上唇适中或略薄，下唇存在感强",
+                ratio: "上下唇厚度约 1:1.5，下唇明显饱满于上唇",
+                aura: "幼态显嫩、无辜可爱、天然减龄",
+                celebRef: "甜系idol型、元气少女型、甜飒兼备型同款唇形",
+                matchFace: ["幼态脸", "圆脸", "甜美可爱脸型"],
+                colorRec: "水蜜桃色、粉红色、奶油草莓色等甜美色系",
+                suggestion: "嘟嘟唇天生减龄可爱！用水光唇釉打造果冻质感最佳。下唇中央叠涂浅色增加嘟嘟立体感，唇线不用画太清晰，保持自然模糊边界感。搭配腮红和卧蚕妆可爱值翻倍。上唇可用唇线笔稍微扩大让上下更均衡。"
+            },
+            flat: {
+                name: "平直唇",
+                desc: "唇峰不突出，嘴角平直，干净利落，偏中性高级感。平直唇的唇峰几乎没有明显M形弧度，上唇线条接近水平，整体唇形方正干净。自带一种'去性别化'的高级感，既不甜美也不性感，而是超越常规审美的独特气质。在高级时装和前卫妆容中，平直唇是最受青睐的唇形之一。",
+                features: "唇峰平缓不突出，上唇线条接近水平，嘴角平直不上翘不下垂，整体唇形方正干净，唇线利落",
+                ratio: "上下唇厚度约 1:1.1，上唇线条平直",
+                aura: "中性高级、干净利落、前卫时尚",
+                celebRef: "清冷东方型、国际超模型、先锋争议型同款唇形",
+                matchFace: ["方脸", "长脸", "骨感脸型", "高级感脸型"],
+                colorRec: "裸色系、肉桂色、脏橘色强化高级感；想出挑选正红色或深梅子色",
+                suggestion: "平直唇自带中性高级感！画唇妆时保持上唇平直线条，不要刻意画出唇峰。哑光质地最配这种利落感，唇色选低饱和裸色系或大地色系最高级。想制造唇峰可在上唇中央微微画出弧度，但保留原生平直感其实更有辨识度。"
+            }
+        };
+const lipFaceMatch = {
+            '直面型': { 'M唇/花瓣唇': 95, '微笑唇': 92, '樱桃唇': 90, '鹅蛋唇/椭圆唇': 93, '厚唇/欧美唇': 88, '薄唇': 91, '嘟嘟唇': 87, '平直唇': 89 },
+            '微凸面型': { 'M唇/花瓣唇': 91, '微笑唇': 89, '樱桃唇': 88, '鹅蛋唇/椭圆唇': 90, '厚唇/欧美唇': 82, '薄唇': 93, '嘟嘟唇': 85, '平直唇': 86 },
+            '丰润型面型': { 'M唇/花瓣唇': 83, '微笑唇': 86, '樱桃唇': 85, '鹅蛋唇/椭圆唇': 87, '厚唇/欧美唇': 78, '薄唇': 92, '嘟嘟唇': 80, '平直唇': 84 },
+            '微凹面型': { 'M唇/花瓣唇': 88, '微笑唇': 89, '樱桃唇': 86, '鹅蛋唇/椭圆唇': 91, '厚唇/欧美唇': 90, '薄唇': 80, '嘟嘟唇': 92, '平直唇': 83 },
+            '柔和型面型': { 'M唇/花瓣唇': 85, '微笑唇': 87, '樱桃唇': 84, '鹅蛋唇/椭圆唇': 93, '厚唇/欧美唇': 91, '薄唇': 79, '嘟嘟唇': 93, '平直唇': 81 },
+            '立体型面型': { 'M唇/花瓣唇': 90, '微笑唇': 84, '樱桃唇': 82, '鹅蛋唇/椭圆唇': 85, '厚唇/欧美唇': 93, '薄唇': 83, '嘟嘟唇': 86, '平直唇': 91 }
+        };
+const faceTypes = {
+            straight: { name: "直面型", score: 95, desc: "E线基本成直线，上下唇位置协调。颌面美学标准模板，侧面线条流畅自然。", features: "下唇略贴E线，上唇微后收0.5-1mm", suggestion: "你的脸型非常标准，保持现状即可。可以尝试各种发型和妆容风格。" },
+            slightlyConvex: { name: "微凸面型", score: 88, desc: "嘴唇轻微超出E线但不突兀，面中柔和前展，自带娇俏明艳感。", features: "东亚美人常见，自带娇俏明艳感", suggestion: "避免过于厚重的刘海，侧分或中分更能展现气质。" },
+            convex: { name: "丰润型面型", score: 75, desc: "嘴唇饱满前展，面部线条柔和外扩，给人亲和温暖的感觉。", features: "亲和力强，有辨识度，适合暖风格", suggestion: "深色唇妆增加精致感，高光打在下巴和鼻梁拉长线条，八字刘海更显气质。" },
+            slightlyConcave: { name: "微凹面型", score: 82, desc: "嘴唇轻微落在E线内侧，上颌略后缩，线条内收柔和。", features: "可能伴随轻微法令纹，气质温婉", suggestion: "饱满唇妆增加立体感，腮红打在苹果肌提升气色。" },
+            concave: { name: "柔和型面型", score: 72, desc: "面部线条内收柔和，轮廓温婉，给人安静内敛的感觉。", features: "气质温婉，适合文艺清新风格", suggestion: "高光增加面中饱满度，选择饱满唇色，蓬松卷发或空气刘海增加柔和感。" },
+            fengjie: { name: "立体型面型", score: 70, desc: "面部起伏明显，五官存在感强，是很有记忆点的面型。", features: "辨识度高，适合打造个人风格", suggestion: "侧分长发修饰轮廓，妆容强调眉眼转移视觉焦点。自信是最好的妆容！" }
+        };
+const celebrityArchetypes = [
+  // 直面型家族 - 端正、古典、清冷
+  {name:'古典仙气型',tag:'清冷脱俗',desc:'气质清雅如仙，五官精致端正',rep:'亦菲',features:{faceWidthHeightRatio:0.73,eyeDistanceRatio:0.43,noseHeightRatio:0.40,jawRoundness:0.62,foreheadRatio:0.39,lipThickness:0.42,eyebrowShape:0.45,cheekboneProminence:0.40}},
+  {name:'端庄知性型',tag:'大方温柔',desc:'面庞端正大气，笑容温暖知性',rep:'圆圆',features:{faceWidthHeightRatio:0.74,eyeDistanceRatio:0.42,noseHeightRatio:0.39,jawRoundness:0.63,foreheadRatio:0.38,lipThickness:0.44,eyebrowShape:0.48,cheekboneProminence:0.42}},
+  {name:'清冷精致型',tag:'冷艳出众',desc:'五官精致立体，气质清冷疏离',rep:'李沁',features:{faceWidthHeightRatio:0.72,eyeDistanceRatio:0.41,noseHeightRatio:0.41,jawRoundness:0.60,foreheadRatio:0.40,lipThickness:0.40,eyebrowShape:0.50,cheekboneProminence:0.44}},
+  {name:'优雅才女型',tag:'知性健康',desc:'高知优雅的气质，运动系健康美',rep:'钧甯',features:{faceWidthHeightRatio:0.75,eyeDistanceRatio:0.44,noseHeightRatio:0.38,jawRoundness:0.64,foreheadRatio:0.37,lipThickness:0.45,eyebrowShape:0.52,cheekboneProminence:0.43}},
+  {name:'甜系少女型',tag:'减龄可爱',desc:'娃娃脸自带减龄buff，亲和力满分',rep:'松韵',features:{faceWidthHeightRatio:0.76,eyeDistanceRatio:0.42,noseHeightRatio:0.36,jawRoundness:0.68,foreheadRatio:0.36,lipThickness:0.50,eyebrowShape:0.47,cheekboneProminence:0.43}},
+
+  // 微凸面型家族 - 立体、妩媚、浓颜
+  {name:'异域浓颜型',tag:'视觉冲击',desc:'五官深邃立体，异域风情浓厚',rep:'热巴',features:{faceWidthHeightRatio:0.78,eyeDistanceRatio:0.45,noseHeightRatio:0.48,jawRoundness:0.72,foreheadRatio:0.35,lipThickness:0.52,eyebrowShape:0.48,cheekboneProminence:0.65}},
+  {name:'精致妩媚型',tag:'时尚百变',desc:'精致妩媚兼具，时尚感极强',rep:'杨幂',features:{faceWidthHeightRatio:0.70,eyeDistanceRatio:0.40,noseHeightRatio:0.38,jawRoundness:0.60,foreheadRatio:0.37,lipThickness:0.48,eyebrowShape:0.50,cheekboneProminence:0.45}},
+  {name:'甜飒兼备型',tag:'可甜可飒',desc:'圆润中带英气，甜美帅气自由切换',rep:'丽颖',features:{faceWidthHeightRatio:0.76,eyeDistanceRatio:0.41,noseHeightRatio:0.36,jawRoundness:0.68,foreheadRatio:0.36,lipThickness:0.50,eyebrowShape:0.47,cheekboneProminence:0.43}},
+  {name:'灵动甜妹型',tag:'活泼可爱',desc:'灵动活泼的气质，笑容甜美感染力十足',rep:'杨紫',features:{faceWidthHeightRatio:0.77,eyeDistanceRatio:0.43,noseHeightRatio:0.35,jawRoundness:0.69,foreheadRatio:0.35,lipThickness:0.52,eyebrowShape:0.46,cheekboneProminence:0.42}},
+  {name:'清新少女型',tag:'长腿元气',desc:'高挑清新的身材，少女感满满',rep:'晓彤',features:{faceWidthHeightRatio:0.71,eyeDistanceRatio:0.40,noseHeightRatio:0.39,jawRoundness:0.61,foreheadRatio:0.38,lipThickness:0.46,eyebrowShape:0.49,cheekboneProminence:0.44}},
+
+  // 丰润型面型家族 - 大气、明艳、温润
+  {name:'大气御姐型',tag:'气场全开',desc:'大气明艳的五官，强大的气场',rep:'蒋欣',features:{faceWidthHeightRatio:0.77,eyeDistanceRatio:0.44,noseHeightRatio:0.43,jawRoundness:0.65,foreheadRatio:0.36,lipThickness:0.50,eyebrowShape:0.55,cheekboneProminence:0.55}},
+  {name:'明艳张扬型',tag:'自信耀眼',desc:'自信张扬的气质，丰满而不失精致',rep:'雨绮',features:{faceWidthHeightRatio:0.76,eyeDistanceRatio:0.43,noseHeightRatio:0.44,jawRoundness:0.64,foreheadRatio:0.35,lipThickness:0.51,eyebrowShape:0.56,cheekboneProminence:0.56}},
+  {name:'温婉文艺型',tag:'知性柔和',desc:'柔和温暖的面庞，知性文艺的气质',rep:'思纯',features:{faceWidthHeightRatio:0.75,eyeDistanceRatio:0.43,noseHeightRatio:0.38,jawRoundness:0.66,foreheadRatio:0.37,lipThickness:0.48,eyebrowShape:0.50,cheekboneProminence:0.45}},
+  {name:'从容大气型',tag:'沉稳优雅',desc:'大气从容的气质，演技与颜值并存',rep:'宋佳',features:{faceWidthHeightRatio:0.74,eyeDistanceRatio:0.42,noseHeightRatio:0.40,jawRoundness:0.63,foreheadRatio:0.38,lipThickness:0.46,eyebrowShape:0.53,cheekboneProminence:0.48}},
+  {name:'高级厌世型',tag:'辨识度极高',desc:'个性鲜明的五官，高级厌世脸',rep:'芷蕾',features:{faceWidthHeightRatio:0.73,eyeDistanceRatio:0.41,noseHeightRatio:0.42,jawRoundness:0.59,foreheadRatio:0.39,lipThickness:0.44,eyebrowShape:0.58,cheekboneProminence:0.52}},
+
+  // 微凹面型家族 - 高级、骨相、灵气
+  {name:'高级氛围型',tag:'气质独特',desc:'独特的高级脸，气质清冷疏离',rep:'倪妮',features:{faceWidthHeightRatio:0.72,eyeDistanceRatio:0.40,noseHeightRatio:0.43,jawRoundness:0.58,foreheadRatio:0.40,lipThickness:0.43,eyebrowShape:0.55,cheekboneProminence:0.50}},
+  {name:'骨相完美型',tag:'东方典范',desc:'骨相完美精致，东方美的典范',rep:'子怡',features:{faceWidthHeightRatio:0.71,eyeDistanceRatio:0.39,noseHeightRatio:0.42,jawRoundness:0.59,foreheadRatio:0.40,lipThickness:0.45,eyebrowShape:0.54,cheekboneProminence:0.48}},
+  {name:'灵气俏皮型',tag:'灵动可爱',desc:'灵动俏皮的气质，辨识度极高',rep:'冬雨',features:{faceWidthHeightRatio:0.74,eyeDistanceRatio:0.41,noseHeightRatio:0.37,jawRoundness:0.64,foreheadRatio:0.38,lipThickness:0.47,eyebrowShape:0.51,cheekboneProminence:0.44}},
+  {name:'清冷文艺型',tag:'文艺气质',desc:'清冷独特的气质，文艺片女主脸',rep:'春夏',features:{faceWidthHeightRatio:0.73,eyeDistanceRatio:0.40,noseHeightRatio:0.39,jawRoundness:0.61,foreheadRatio:0.41,lipThickness:0.44,eyebrowShape:0.56,cheekboneProminence:0.47}},
+  {name:'个性先锋型',tag:'时尚icon',desc:'个性鲜明不随流，国际时尚宠儿',rep:'文淇',features:{faceWidthHeightRatio:0.72,eyeDistanceRatio:0.39,noseHeightRatio:0.41,jawRoundness:0.57,foreheadRatio:0.41,lipThickness:0.43,eyebrowShape:0.59,cheekboneProminence:0.53}},
+
+  // 柔和型面型家族 - 温婉、知性、甜帅
+  {name:'温婉仙女型',tag:'岁月静好',desc:'温婉淡雅的气质，如诗如画',rep:'诗诗',features:{faceWidthHeightRatio:0.74,eyeDistanceRatio:0.43,noseHeightRatio:0.39,jawRoundness:0.65,foreheadRatio:0.38,lipThickness:0.43,eyebrowShape:0.46,cheekboneProminence:0.42}},
+  {name:'知性丽人型',tag:'优雅红唇',desc:'知性优雅的都市丽人，红唇杀手',rep:'疏影',features:{faceWidthHeightRatio:0.71,eyeDistanceRatio:0.41,noseHeightRatio:0.40,jawRoundness:0.60,foreheadRatio:0.39,lipThickness:0.45,eyebrowShape:0.52,cheekboneProminence:0.45}},
+  {name:'精致混血型',tag:'五官立体',desc:'精致立体的五官，混血感十足',rep:'娜扎',features:{faceWidthHeightRatio:0.75,eyeDistanceRatio:0.44,noseHeightRatio:0.45,jawRoundness:0.66,foreheadRatio:0.36,lipThickness:0.49,eyebrowShape:0.49,cheekboneProminence:0.58}},
+  {name:'甜帅idol型',tag:'舞台魅力',desc:'甜美帅气兼备，舞台魅力四射',rep:'宋茜',features:{faceWidthHeightRatio:0.73,eyeDistanceRatio:0.42,noseHeightRatio:0.38,jawRoundness:0.64,foreheadRatio:0.37,lipThickness:0.47,eyebrowShape:0.54,cheekboneProminence:0.46}},
+  {name:'治愈甜笑型',tag:'亲和力爆棚',desc:'笑容治愈力满分，亲和力爆棚',rep:'艺昕',features:{faceWidthHeightRatio:0.75,eyeDistanceRatio:0.43,noseHeightRatio:0.37,jawRoundness:0.67,foreheadRatio:0.36,lipThickness:0.51,eyebrowShape:0.48,cheekboneProminence:0.43}},
+
+  // 立体型面型家族 - 超模、清冷、先锋
+  {name:'国际超模型',tag:'高级脸标杆',desc:'五官棱角分明，高级脸标杆',rep:'刘雯',features:{faceWidthHeightRatio:0.69,eyeDistanceRatio:0.39,noseHeightRatio:0.44,jawRoundness:0.54,foreheadRatio:0.41,lipThickness:0.40,eyebrowShape:0.57,cheekboneProminence:0.60}},
+  {name:'清冷东方型',tag:'极致之美',desc:'清冷疏离的东方美，极致骨相',rep:'杜鹃',features:{faceWidthHeightRatio:0.70,eyeDistanceRatio:0.38,noseHeightRatio:0.45,jawRoundness:0.55,foreheadRatio:0.42,lipThickness:0.39,eyebrowShape:0.59,cheekboneProminence:0.58}},
+  {name:'先锋争议型',tag:'颠覆审美',desc:'颠覆传统审美，国际认可度极高',rep:'吕燕',features:{faceWidthHeightRatio:0.71,eyeDistanceRatio:0.37,noseHeightRatio:0.46,jawRoundness:0.52,foreheadRatio:0.40,lipThickness:0.41,eyebrowShape:0.60,cheekboneProminence:0.62}},
+  {name:'冷白超模型',tag:'肤白胜雪',desc:'肤白胜雪的肌肤，超模身材比例',rep:'何穗',features:{faceWidthHeightRatio:0.70,eyeDistanceRatio:0.40,noseHeightRatio:0.43,jawRoundness:0.56,foreheadRatio:0.40,lipThickness:0.42,eyebrowShape:0.55,cheekboneProminence:0.56}},
+  {name:'棱角高定型',tag:'时装脸',desc:'棱角分明的面部，高定时装脸',rep:'菲菲',features:{faceWidthHeightRatio:0.68,eyeDistanceRatio:0.38,noseHeightRatio:0.45,jawRoundness:0.53,foreheadRatio:0.42,lipThickness:0.38,eyebrowShape:0.58,cheekboneProminence:0.59}}
+];
+const faceIntensityTypes = {
+            strong: {
+                name: '浓颜系',
+                tag: '🔥 浓颜',
+                desc: '你的五官存在感强，色彩对比鲜明，骨相立体深邃。第一眼就被五官牢牢抓住，属于"一眼抓人"型长相。',
+                features: ['五官轮廓清晰，线条锐利', '眉浓眼深，黑白对比强', '面部骨骼立体，轮廓感明显', '整体色彩饱和度高，视觉冲击力强'],
+                celebRef: ['异域浓颜型', '古典仙气型', '港风美人型', '妩媚御姐型'],
+                aura: '大气、明艳、御姐、有攻击性的美',
+                makeupTips: '浓颜底子好，淡妆即有气场。裸妆或哑光质感最能突出五官优势，避免过度叠加造成"用力过猛"。',
+                styleTips: '大轮廓的耳饰、简约线条的服装最衬你。浓颜+简约=高级感。'
+            },
+            light: {
+                name: '淡颜系',
+                tag: '🌸 淡颜',
+                desc: '你的五官柔和内敛，色彩过渡自然，骨相平缓温柔。不是靠单个五官取胜，而是整体气质先入为人心，越看越好看。',
+                features: ['五官线条柔和，边界感弱', '眉色偏浅，眼妆留白多', '面部骨骼平缓，轮廓圆润', '整体色调柔和，过渡自然'],
+                celebRef: ['温婉仙女型', '清冷淡雅型', '甜系少女型', '韩系清冷型'],
+                aura: '温柔、清冷、邻家、氛围感美人',
+                makeupTips: '淡颜的优势是"可塑性"。强调某一个五官（如眼妆或唇色）就能变化风格，日系/韩系/文艺风都能驾驭。',
+                styleTips: '柔和面料（针织、雪纺）和浅色系最衬你。精致小巧的配饰比大轮廓更加分。'
+            },
+            strongLight: {
+                name: '浓中带淡',
+                tag: '🔥🌸 浓中带淡',
+                desc: '你的骨相偏立体但五官线条柔和，或者色彩对比强但轮廓圆润。这种"浓颜骨相+淡颜气质"的组合非常有记忆点，兼具冲击力和耐看度。',
+                features: ['骨骼立体但五官线条偏柔', '色彩对比感中等偏高', '正面看气质清淡，侧面轮廓深邃', '妆前偏淡，妆后可以很浓'],
+                celebRef: ['骨相完美型', '高级氛围型', '文艺气质型', '灵气俏皮型'],
+                aura: '高级感、变化丰富、可甜可御',
+                makeupTips: '你最适合"在浓淡之间切换"。日常淡妆走气质路线，出席场合加重眉眼即可华丽转场。',
+                styleTips: '你的穿搭包容度很高，简约和华丽都能撑住。根据场合灵活调整即可。'
+            },
+            lightStrong: {
+                name: '淡中带浓',
+                tag: '🌸🔥 淡中带浓',
+                desc: '你的整体气质偏柔和清淡，但某个五官特别出挑（比如眉浓、唇艳、或眼神锐利）。这个"点睛之笔"让你在淡颜的基础上多了辨识度。',
+                features: ['整体色调柔和，但有一两处亮点', '骨相平缓但某处线条锐利', '第一眼看是淡颜，细看有浓颜元素', '素颜清淡但上妆变化大'],
+                celebRef: ['精致妩媚型', '甜飒兼备型', '甜美人型', '清新少女型'],
+                aura: '甜美中带一丝锋芒、有记忆点的邻家美',
+                makeupTips: '找到你的"浓颜点"重点强调。如果是眉浓就保持野生眉，如果是唇艳就画好唇妆，让这个特点成为标志。',
+                styleTips: '甜酷风格最适合你——基础淡雅搭配一件有态度的单品（红唇、皮衣、个性配饰）。'
+            }
+        };
+const intensityFaceMatch = {
+            '直面型': { strong: 25, light: 30, strongLight: 25, lightStrong: 20 },
+            '微凸面型': { strong: 35, light: 15, strongLight: 30, lightStrong: 20 },
+            '丰润型面型': { strong: 20, light: 25, strongLight: 20, lightStrong: 35 },
+            '微凹面型': { strong: 15, light: 35, strongLight: 20, lightStrong: 30 },
+            '柔和型面型': { strong: 10, light: 40, strongLight: 15, lightStrong: 35 },
+            '立体型面型': { strong: 45, light: 5, strongLight: 35, lightStrong: 15 }
+        };
+function dist(p1, p2) {
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
-  });
+function calcFaceMetrics(landmarks) {
+        const pts = landmarks.positions;
+        const faceWidth = dist(pts[0], pts[16]);
+        const faceHeight = Math.abs(pts[27].y - pts[8].y);
+        const centerX = (pts[0].x + pts[16].x) / 2;
+        const browLevel = Math.min(pts[19].y, pts[24].y);
+        const foreheadY = browLevel - faceHeight * 0.15;
+        const upperFace = Math.abs(foreheadY - pts[27].y);
+        const midFace = Math.abs(pts[27].y - pts[51].y);
+        const lowerFace = Math.abs(pts[51].y - pts[8].y);
+        const leftEyeW = dist(pts[36], pts[39]);
+        const rightEyeW = dist(pts[42], pts[45]);
+        const avgEyeW = (leftEyeW + rightEyeW) / 2;
+        const eyeDistance = dist(pts[39], pts[42]);
+        const noseH = Math.abs(pts[27].y - pts[30].y);
+        const noseW = dist(pts[31], pts[35]);
+        const mouthW = dist(pts[48], pts[54]);
+        const upperLipH = Math.abs(pts[51].y - pts[62].y);
+        const lowerLipH = Math.abs(pts[66].y - pts[57].y);
+        const jawW = dist(pts[5], pts[11]);
+        const symPairs = [[1,15],[2,14],[3,13],[4,12],[5,11]];
+        let symScore = 0;
+        symPairs.forEach(([l,r]) => {
+            const dl = Math.abs(pts[l].x - centerX);
+            const dr = Math.abs(pts[r].x - centerX);
+            symScore += 1 - Math.abs(dl - dr) / Math.max(dl, dr, 1);
+        });
+        symScore /= symPairs.length;
+        const eyeLvl = (pts[37].y + pts[43].y) / 2;
+        const mouthLvl = (pts[48].y + pts[54].y) / 2;
+        const mouthUp = mouthLvl > eyeLvl ? 1 : 0.5 + Math.max(0, (eyeLvl - mouthLvl)) / faceHeight;
+        return { faceWidth, faceHeight, upperFace, midFace, lowerFace, avgEyeW, eyeDistance, noseH, noseW, mouthW, upperLipH, lowerLipH, jawW, symScore, mouthUp, pts, browLevel };
+    }
+function calculateIndicators(m) {
+        const indicators = [];
+        const totalH = m.upperFace + m.midFace + m.lowerFace;
+        const score = (val, min, max) => {
+            // 将值映射到 45-95 分区间
+            // 正常范围(min~max)映射到 55-85 分
+            // 低于min映射到 45-55 分
+            // 高于max映射到 85-95 分
+            let normalized = (val - min) / (max - min);
+            let s;
+            if (normalized < 0) {
+                s = 50 + normalized * 20;
+            } else if (normalized > 1) {
+                s = 85 + Math.min(1, (normalized - 1) * 2) * 10;
+            } else {
+                s = 55 + normalized * 30;
+            }
+            return Math.max(45, Math.min(95, Math.round(s)));
+        };
+
+        // 1. 额头饱满度
+        const foreheadScore = score(m.upperFace / totalH, 0.28, 0.40);
+        indicators.push({
+            name: '额头饱满度', score: foreheadScore,
+            tradition: '额头区域饱满代表思维开阔、学习能力强，是智慧的象征',
+            science: '前额叶皮层发育与认知能力、决策力呈正相关',
+            comment: '你天生具备清晰的思维逻辑，学习能力出众，善于从复杂信息中提取关键要点。',
+            future: '这意味着你在<strong>知识密集型领域</strong>（如创意、策划、研究、教育）有天然优势。年轻时就能在学业或专业领域建立口碑，<strong>中年后更容易凭借专业积累获得高收入或行业地位</strong>。',
+            color: '#e74c3c', category: '才华'
+        });
+
+        // 2. 眉心舒展度
+        const browDist = dist(m.pts[21], m.pts[22]);
+        const browScore = score(browDist / m.faceWidth, 0.08, 0.16);
+        indicators.push({
+            name: '眉心舒展度', score: browScore,
+            tradition: '眉心区域舒展代表心胸宽广、情绪稳定，不易钻牛角尖',
+            science: '面部中央区域的对称性与社交自信度、可信度感知相关',
+            comment: '你待人接物磊落大方，情绪管理能力出色，遇到压力也能保持平和心态。',
+            future: '这意味着你在<strong>需要协调多方关系的工作</strong>中表现出色，比如管理、公关、人力资源。情绪稳定是高收入人群的共性特征，<strong>你具备成为团队中坚的潜质</strong>。',
+            color: '#3498db', category: '幸福'
+        });
+
+        // 3. 眉形清晰度
+        const browSym = 1 - Math.abs(dist(m.pts[17], m.pts[21]) - dist(m.pts[22], m.pts[26])) / m.faceWidth;
+        indicators.push({
+            name: '眉形清晰度', score: score(browSym, 0.7, 1.0),
+            tradition: '眉毛清晰有序代表性情温和、处事有条理，给人可靠印象',
+            science: '眉毛对称性与面部吸引力正相关，清晰眉形提升信任感',
+            comment: '你内心细腻，善于体察他人情绪，做事有条理，是团队中让人安心的存在。',
+            future: '这意味着你<strong>适合需要精细度和责任感的职业</strong>，如财务、法务、项目管理。可靠的性格会让你积累深厚的人脉资源，<strong>关键时刻总有人愿意把重要机会交给你</strong>。',
+            color: '#9b59b6', category: '才华'
+        });
+
+        // 4. 眼睛明亮度
+        const eyeScore = score(m.avgEyeW / m.faceWidth, 0.06, 0.12);
+        indicators.push({
+            name: '眼睛明亮度', score: eyeScore,
+            tradition: '眼睛明亮有神代表聪慧机敏、精力充沛，对事物有敏锐洞察',
+            science: '眼裂大小与感知敏锐度、情绪识别能力存在相关性',
+            comment: '你观察力敏锐，善于捕捉细节，对人对事有独到见解，是天生的洞察者。',
+            future: '这意味着你在<strong>需要洞察力和判断力的领域</strong>如鱼得水，比如投资分析、市场调研、心理咨询。敏锐的眼光让你<strong>比别人更早发现机会，更容易在竞争中占得先机</strong>。',
+            color: '#1abc9c', category: '才华'
+        });
+
+        // 5. 眼周亲和力
+        const lowerLidCurve = Math.abs(m.pts[40].y - m.pts[41].y) + Math.abs(m.pts[46].y - m.pts[47].y);
+        indicators.push({
+            name: '眼周亲和力', score: score(Math.min(1, lowerLidCurve / (m.faceHeight * 0.08)), 0.3, 1.0),
+            tradition: '眼周区域饱满代表亲和力强、人缘好，容易获得他人好感',
+            science: '下眼睑饱满度与年轻态、亲和力高度相关',
+            comment: '你天生自带温暖磁场，笑起来治愈感十足，无论走到哪里都能快速拉近与人的距离。',
+            future: '这意味着你<strong>拥有极强的社交资本</strong>。在需要人脉资源的行业（如销售、自媒体、创业）中，你的人缘会直接转化为机会和收入。<strong>好的人际关系是你最大的财富之一</strong>。',
+            color: '#e67e22', category: '幸福'
+        });
+
+        // 6. 眼距协调度
+        const eyeDistRatio = m.eyeDistance / m.faceWidth;
+        indicators.push({
+            name: '眼距协调度', score: score(1 - Math.abs(eyeDistRatio - 0.47) / 0.47, 0.5, 1.0),
+            tradition: '眼距协调代表判断力精准、审美出众，善于平衡各方关系',
+            science: '眼距与面宽比接近黄金比例时，面部吸引力评分最高',
+            comment: '你看问题客观公正，审美在线，在复杂局面中总能做出理性且兼顾各方的判断。',
+            future: '这意味着你<strong>具备优秀的平衡感和统筹能力</strong>，适合做决策者或协调者。无论是创业还是职场晋升，<strong>你都能在不同利益方之间找到最优解，这是管理者必备的核心能力</strong>。',
+            color: '#2ecc71', category: '才华'
+        });
+
+        // 7. 鼻梁立体度
+        const noseScore = score(m.noseH / m.faceHeight, 0.18, 0.32);
+        indicators.push({
+            name: '鼻梁立体度', score: noseScore,
+            tradition: '鼻梁挺拔代表意志坚定、目标感强，做事有主见有魄力',
+            science: '鼻梁高度与面部立体感、领导气质感知相关',
+            comment: '你目标明确，执行力强，面对困难敢于担当，是天生的领导型人格。',
+            future: '这意味着你<strong>具备创业者和领导者最核心的特质</strong>：目标感和执行力。在事业上你容易获得他人的追随和信任，<strong>35岁后进入事业黄金期的概率很高</strong>。',
+            color: '#e74c3c', category: '财富'
+        });
+
+        // 8. 鼻尖柔和度
+        indicators.push({
+            name: '鼻尖柔和度', score: score(m.noseW / (dist(m.pts[27], m.pts[28]) * 2), 0.4, 1.0),
+            tradition: '鼻尖圆润代表心地善良、性格温和，与人相处没有攻击性',
+            science: '鼻尖圆润度与面部亲和力正相关，降低人际距离感',
+            comment: '你为人厚道，乐于助人，性格温和不尖锐，好人缘为你积累了深厚的社会资本。',
+            future: '这意味着你<strong>在合作型环境中如鱼得水</strong>。善良不是软弱，而是一种长期主义的投资——<strong>你帮助过的人，未来都会成为你最坚实的后盾和合作伙伴</strong>。',
+            color: '#f39c12', category: '幸福'
+        });
+
+        // 9. 人中比例度
+        const philtrum = dist(m.pts[30], m.pts[51]);
+        indicators.push({
+            name: '人中比例度', score: score(philtrum / m.lowerFace, 0.25, 0.45),
+            tradition: '人中比例适中代表健康长寿、精力充沛，做事有恒心',
+            science: '人中长度与面部纵向发育协调相关，是面部年轻化的重要指标',
+            comment: '你身体素质好，精力充沛，做事有恒心耐力，属于越活越有活力的类型。',
+            future: '这意味着你<strong>拥有持续奋斗的体力资本</strong>。在追求长期目标的道路上，别人可能中途放弃，但你能坚持到底。<strong>持久的战斗力是你超越同龄人的关键优势</strong>。',
+            color: '#1abc9c', category: '幸福'
+        });
+
+        // 10. 唇形饱满度
+        const lipScore = score((m.upperLipH + m.lowerLipH) / m.faceHeight, 0.03, 0.08);
+        indicators.push({
+            name: '唇形饱满度', score: lipScore,
+            tradition: '嘴唇饱满代表健康状况良好、表达能力出众，善于沟通交流',
+            science: '唇形丰满度与吸引力相关，唇色与血液循环、健康状态相关',
+            comment: '你天生好气色，表达能力强，善于用语言传递温暖，懂得享受生活的美好。',
+            future: '这意味着你<strong>在需要表达和沟通的行业中占据天然优势</strong>，比如讲师、主播、律师、谈判专家。你的语言有感染力，<strong>能说服别人、打动别人，这是高价值能力的核心</strong>。',
+            color: '#e74c3c', category: '才华'
+        });
+
+        // 11. 笑容感染力
+        const smileScore = score(m.mouthUp, 0.4, 1.0);
+        indicators.push({
+            name: '笑容感染力', score: smileScore,
+            tradition: '嘴角自然上扬代表乐观开朗、心态积极，容易感染身边人',
+            science: '嘴角角度与情绪表达正相关，上扬嘴角提升面部吸引力15%以上',
+            comment: '你自带阳光属性，即便遇到困难也能保持积极心态，这种正能量感染着身边每一个人。',
+            future: '这意味着你<strong>拥有情绪领导力的天赋</strong>。在团队中，你的乐观能带动整体士气；在社交中，你的笑容是最好的名片。<strong>积极心态本身就是吸引好运的磁场</strong>。',
+            color: '#f1c40f', category: '幸福'
+        });
+
+        // 12. 下巴稳定度
+        const jawScore = score(m.jawW / m.faceWidth, 0.25, 0.45);
+        indicators.push({
+            name: '下巴稳定度', score: jawScore,
+            tradition: '下巴方圆代表性格沉稳、包容力强，是让人信赖的依靠',
+            science: '下巴宽度与决断力、坚持力的感知相关，方圆下巴增强可信度',
+            comment: '你包容心强，有长者之风，做事稳扎稳打，越到关键时刻越能给人安全感。',
+            future: '这意味着你<strong>具备大器晚成的潜质</strong>。年轻时可能不显山露水，但随着年龄增长，你的沉稳和积累会越来越值钱。<strong>40岁后是你人生收获的集中爆发期</strong>。',
+            color: '#9b59b6', category: '财富'
+        });
+
+        // 13. 面部均衡度
+        const courtBalance = 1 - (Math.abs(m.upperFace - m.midFace) + Math.abs(m.midFace - m.lowerFace)) / totalH;
+        indicators.push({
+            name: '面部均衡度', score: score(courtBalance, 0.7, 1.0),
+            tradition: '上中下庭比例均衡代表各方面发展平衡，人生节奏把握得当',
+            science: '面部三等分接近1:1:1时与平均吸引力高度相关，是跨文化审美共识',
+            comment: '你各方面发展均衡，没有明显短板，人生如同精心设计的拼图，每一块都恰到好处。',
+            future: '这意味着你<strong>的人生抗风险能力很强</strong>。当某一方面遇到挫折时，其他方面能为你提供支撑。<strong>均衡型人格最容易获得细水长流的幸福感</strong>。',
+            color: '#2ecc71', category: '稳健'
+        });
+
+        // 14. 五官集中度
+        const featureCenterX = (m.pts[27].x + m.pts[30].x + m.pts[51].x) / 3;
+        const centerDev = Math.abs(featureCenterX - (m.pts[0].x + m.pts[16].x) / 2) / m.faceWidth;
+        indicators.push({
+            name: '五官集中度', score: score(1 - centerDev * 5, 0.5, 1.0),
+            tradition: '五官向中聚拢代表专注力出色、目标感强，做事容易事半功倍',
+            science: '五官集中度与面部识别效率、整体协调性存在相关性',
+            comment: '你善于整合资源，有凝聚力，能把分散的力量汇聚成势，做事容易事半功倍。',
+            future: '这意味着你<strong>具备将想法落地为成果的能力</strong>。很多人有想法但无法执行，而你能把碎片化的资源整合为完整的方案。<strong>这种能力在创业和项目管理中极为稀缺</strong>。',
+            color: '#e67e22', category: '财富'
+        });
+
+        // 15. 面部对称度
+        indicators.push({
+            name: '面部对称度', score: score(m.symScore, 0.7, 0.98),
+            tradition: '面部对称代表健康基础好、性格稳定，做事踏实可靠',
+            science: '面部对称性是基因健康的重要指标，对称脸吸引力评分显著更高',
+            comment: '你做事踏实可靠，不投机取巧，这种稳重的性格让你在人生路上少有大的起伏。',
+            future: '这意味着你<strong>的人生轨迹会相对平稳</strong>。虽然可能缺少大起大落的故事，但也不会经历毁灭性的打击。<strong>稳健本身就是一种福气，尤其在经济下行周期中更显珍贵</strong>。',
+            color: '#3498db', category: '幸福'
+        });
+
+        // 16. 颧骨协调度
+        const cheekbone = (dist(m.pts[1], {x: (m.pts[0].x+m.pts[16].x)/2, y: m.pts[1].y}) +
+                          dist(m.pts[15], {x: (m.pts[0].x+m.pts[16].x)/2, y: m.pts[15].y})) / 2;
+        const cheekScore = 1 - Math.abs(cheekbone / m.faceWidth - 0.21) / 0.21;
+        indicators.push({
+            name: '颧骨协调度', score: score(cheekScore, 0.5, 1.0),
+            tradition: '颧骨高低适中代表刚柔并济，既有决断力又有亲和力',
+            science: '颧骨突出度与社交支配力感知相关，适中颧骨最具普适吸引力',
+            comment: '你既有决断力又有亲和力，能在坚持原则和照顾他人感受之间找到完美平衡。',
+            future: '这意味着你<strong>具备管理者最难修炼的"软技能"</strong>：既能做出艰难决定，又不伤害团队关系。<strong>这种刚柔并济的特质，让你在任何组织中都能快速晋升到管理岗位</strong>。',
+            color: '#e74c3c', category: '财富'
+        });
+
+        // 17. 耳位发育度
+        const earEst = Math.min(m.pts[0].y, m.pts[16].y);
+        const earHigh = earEst < m.browLevel + m.faceHeight * 0.05 ? 0.9 : 0.7;
+        indicators.push({
+            name: '耳位发育度', score: score(earHigh, 0.5, 1.0),
+            tradition: '耳朵位置偏高代表学习能力出众、领悟力强，对新事物接受快',
+            science: '耳朵位置与颅面发育协调度相关',
+            comment: '你学习能力出众，对新事物接受快，领悟力强，往往一点就通。',
+            future: '这意味着你<strong>在快速变化的行业中具有天然优势</strong>。当行业迭代时，别人还在犹豫观望，你已经掌握了新技能。<strong>学习速度就是竞争力，时代越动荡，你的优势越明显</strong>。',
+            color: '#1abc9c', category: '才华'
+        });
+
+        // 18. 耳垂饱满度
+        const earSize = Math.abs(m.pts[0].y - m.pts[2].y) + Math.abs(m.pts[16].y - m.pts[14].y);
+        indicators.push({
+            name: '耳垂饱满度', score: score(Math.min(1, earSize / (m.faceHeight * 0.25)), 0.3, 1.0),
+            tradition: '耳垂厚大代表福气深厚、身体底子好，抗压能力强',
+            science: '耳垂厚度在东亚文化中被广泛视为健康与福气的标志',
+            comment: '你身体底子好，抗压能力强，遇到困难不容易被击垮，属于越挫越勇的类型。',
+            future: '这意味着你<strong>具备穿越周期的生存能力</strong>。无论经济环境好坏，你都能稳稳地活下去，并且活得不错。<strong>韧性比爆发力更重要，而你有的是韧性</strong>。',
+            color: '#f39c12', category: '幸福'
+        });
+
+        // 19. 面龄年轻度
+        const nasolabial = Math.abs(m.pts[31].y - m.pts[48].y) + Math.abs(m.pts[35].y - m.pts[54].y);
+        indicators.push({
+            name: '面龄年轻度', score: score(1 - Math.min(1, nasolabial / (m.faceHeight * 0.3)), 0.3, 1.0),
+            tradition: '面部纹路浅淡代表心态年轻、皮肤状态好，活得通透自在',
+            science: '鼻唇沟深度与皮肤弹性、胶原蛋白含量相关，是面部年轻化指标',
+            comment: '你内心纯真，不容易被世俗烦恼困扰，活得通透自在，是朋友圈里的"少年感"担当。',
+            future: '这意味着你<strong>拥有超越年龄的心理年轻度</strong>。心态年轻的人更容易接受新观念、拥抱变化。<strong>在技术快速迭代的时代，心理年轻就是最大的竞争力</strong>。',
+            color: '#2ecc71', category: '幸福'
+        });
+
+        // 20. 气色健康度
+        indicators.push({
+            name: '气色健康度', score: score((m.upperFace + m.midFace) / (m.faceHeight * 1.3), 0.4, 0.7),
+            tradition: '面色红润代表气血充足、精力充沛，做事有冲劲',
+            science: '面部肤色红润度与血液循环、血红蛋白含量正相关，是健康的外在标志',
+            comment: '你精力饱满，做事有冲劲，整个人的状态充满活力，这种好状态会为你吸引来更多机会。',
+            future: '这意味着你<strong>拥有持续输出高质量的体力基础</strong>。当同龄人开始疲惫时，你还能保持高强度工作。<strong>体力差距会在35岁后开始显现，而你处于领先位置</strong>。',
+            color: '#e74c3c', category: '稳健'
+        });
+
+        // 21. 额头平滑度
+        indicators.push({
+            name: '额头平滑度', score: score(m.upperFace / totalH, 0.25, 0.40),
+            tradition: '额头平滑代表思路清晰、不被杂念困扰，年轻时就能取得成就',
+            science: '额头皮肤平滑度与年轻态感知高度相关',
+            comment: '你思维敏捷，不被杂念困扰，做事条理分明，年轻时就能取得不错的成就。',
+            future: '这意味着你<strong>具备"清晰思考"的稀缺能力</strong>。在信息爆炸的时代，大多数人被杂念和焦虑淹没，而你能保持头脑清醒。<strong>清晰的头脑就是最高的智商税豁免权</strong>。',
+            color: '#3498db', category: '才华'
+        });
+
+        // 22. 鼻根立体度
+        const noseRoot = Math.abs(m.pts[27].y - m.browLevel) / m.faceHeight;
+        indicators.push({
+            name: '鼻根立体度', score: score(noseRoot, 0.04, 0.12),
+            tradition: '鼻根挺拔代表根基深厚、做事有底气，发展后劲十足',
+            science: '鼻根高度与面部整体立体感相关，鼻额角影响侧面轮廓美感',
+            comment: '你做事有底气，不浮躁，早年积累为你打下了坚实基础，发展后劲十足。',
+            future: '这意味着你<strong>不是"暴发户型"的成功，而是"厚积薄发型"</strong>。你的成长曲线是缓慢而坚实的，每一步都踩得很稳。<strong>这种成功模式虽然不快，但最持久</strong>。',
+            color: '#9b59b6', category: '财富'
+        });
+
+        // 23. 鼻尖突出度
+        const noseTip = dist(m.pts[30], {x: m.pts[30].x, y: m.pts[27].y}) / m.faceWidth;
+        indicators.push({
+            name: '鼻尖突出度', score: score(noseTip, 0.04, 0.12),
+            tradition: '鼻尖丰隆代表目标感强、做事有主见，善于把握机会',
+            science: '鼻尖突出度与面部立体感相关，丰隆鼻尖增强面部辨识度',
+            comment: '你对机会有天生的敏感度，善于判断时机，懂得让资源为自己增值。',
+            future: '这意味着你<strong>具备商业嗅觉</strong>。当别人还在犹豫时，你已经嗅到了机会的味道。<strong>无论是投资还是创业，你进入和退出的时机往往比别人更准确</strong>。',
+            color: '#f39c12', category: '财富'
+        });
+
+        // 24. 鼻翼清晰度
+        const nostrilDef = dist(m.pts[31], m.pts[30]) + dist(m.pts[35], m.pts[30]);
+        indicators.push({
+            name: '鼻翼清晰度', score: score(Math.min(1, nostrilDef / (m.faceWidth * 0.15)), 0.3, 1.0),
+            tradition: '鼻翼轮廓分明代表做事有条理、善于规划，会过日子',
+            science: '鼻翼清晰度与面部结构鲜明度相关，鼻翼分明增强面部精致感',
+            comment: '你做事有规划，不冲动消费，懂得积累，是身边人眼中会过日子的聪明人。',
+            future: '这意味着你<strong>具备理财天赋</strong>。收入高低不是决定财富的关键，会规划才是。<strong>你天生懂得让钱生钱，复利效应会在你身上体现得淋漓尽致</strong>。',
+            color: '#1abc9c', category: '财富'
+        });
+
+        // 25. 太阳穴饱满度
+        const templeFill = (dist(m.pts[0], m.pts[1]) + dist(m.pts[16], m.pts[15])) / 2 / m.faceWidth;
+        indicators.push({
+            name: '太阳穴饱满度', score: score(templeFill, 0.08, 0.18),
+            tradition: '太阳穴饱满代表感情顺遂、婚姻美满，懂得经营关系',
+            science: '太阳穴饱满度与面部轮廓流畅度相关，凹陷太阳穴显老态',
+            comment: '你在感情中专一认真，懂得经营关系，长期感情生活和谐美满。',
+            future: '这意味着你<strong>拥有经营亲密关系的能力</strong>。事业再成功，如果后院起火也会心力交瘁。<strong>你能平衡事业与家庭，这是很多人终其一生都学不会的平衡术</strong>。',
+            color: '#e74c3c', category: '幸福'
+        });
+
+        // 26. 眉眼间距度
+        const tianzhai = Math.abs((m.pts[19].y + m.pts[24].y) / 2 - (m.pts[37].y + m.pts[43].y) / 2) / m.midFace;
+        indicators.push({
+            name: '眉眼间距度', score: score(tianzhai, 0.08, 0.20),
+            tradition: '眉眼间距适中代表家庭观念强、有归属感，重视生活环境',
+            science: '上眼睑区域饱满度与精神状态、休息质量相关',
+            comment: '你重视家庭，有归属感，善于为自己和家人创造舒适的生活环境。',
+            future: '这意味着你<strong>拥有"安居乐业"的底层能力</strong>。无论外面的世界多动荡，你总能为自己和家人筑起一个安全的港湾。<strong>这种安全感是无价的，也是你拼搏的底气</strong>。',
+            color: '#3498db', category: '幸福'
+        });
+
+        // 27. 下眼睑饱满度
+        const zinvgong = Math.abs(m.pts[40].y - m.pts[41].y) + Math.abs(m.pts[46].y - m.pts[47].y);
+        indicators.push({
+            name: '下眼睑饱满度', score: score(zinvgong / m.faceHeight, 0.02, 0.07),
+            tradition: '下眼睑饱满代表与晚辈缘分深厚，善于教导和引导他人',
+            science: '下眼睑饱满是面部年轻化的核心标志，与亲和力、父性/母性感知相关',
+            comment: '你与晚辈缘分深厚，善于教导和引导，无论是自己的孩子还是身边的年轻人，都乐于向你请教。',
+            future: '这意味着你<strong>天生具备 mentorship（导师）潜质</strong>。在职场中，带人的能力比做事的能力更稀缺。<strong>当你成为他人愿意追随的领导时，你的价值会成倍放大</strong>。',
+            color: '#2ecc71', category: '才华'
+        });
+
+        // 28. 耳前饱满度
+        const mingmen = (dist({x: m.pts[0].x, y: (m.pts[0].y+m.pts[2].y)/2}, m.pts[1]) +
+                        dist({x: m.pts[16].x, y: (m.pts[16].y+m.pts[14].y)/2}, m.pts[15])) / 2 / m.faceWidth;
+        indicators.push({
+            name: '耳前饱满度', score: score(mingmen, 0.05, 0.15),
+            tradition: '耳前区域饱满代表根基稳固、抗压能力强，属于越挫越勇的类型',
+            science: '耳前区域与颞部发育相关，厚实颞部是面部整体饱满的标志',
+            comment: '你身体底子好，抗压能力强，遇到困难不容易被击垮，属于越挫越勇的类型。',
+            future: '这意味着你<strong>具备穿越周期的生存能力</strong>。无论经济环境好坏，你都能稳稳地活下去，并且活得不错。<strong>韧性比爆发力更重要，而你有的是韧性</strong>。',
+            color: '#e67e22', category: '财富'
+        });
+
+        // 29. 五官和谐度
+        const coordination = (m.symScore + courtBalance + (1 - centerDev * 5)) / 3;
+        indicators.push({
+            name: '五官和谐度', score: score(coordination, 0.5, 1.0),
+            tradition: '五官比例协调代表各方面条件均衡，没有明显短板',
+            science: '面部整体接近黄金比例时，跨文化吸引力评分最高',
+            comment: '你各方面条件均衡，没有明显短板，人生如同精心设计的拼图，每一块都恰到好处。',
+            future: '这意味着你<strong>的人生选择面很宽</strong>。不像某些"偏科型"人格只能走一条路，你可以在多个领域切换自如。<strong>多元化能力让你拥有更多退路，也拥有更多可能性</strong>。',
+            color: '#9b59b6', category: '幸福'
+        });
+
+        // 30. 综合魅力值
+        const avgScore = indicators.reduce((s, i) => s + i.score, 0) / indicators.length;
+        indicators.push({
+            name: '综合魅力值', score: Math.round(avgScore),
+            tradition: '综合魅力值高代表全方位优秀，是天生的焦点人物',
+            science: '面部整体吸引力是健康、基因、激素水平的多重信号',
+            comment: '你集多重优点于一身，是少有的全方位魅力型人格，走到哪里都能成为人群中的焦点。',
+            future: '这意味着你<strong>具备成为"六边形战士"的潜质</strong>。单一维度的优秀容易被替代，但全方位优秀很难被复制。<strong>你的综合竞争力会随着年龄增长越来越强</strong>。',
+            color: '#f4d03f', category: '才华'
+        });
+
+        return indicators;
+    }
+function determineType(indicators) {
+        const top10 = [...indicators].sort((a,b) => b.score - a.score).slice(0, 10);
+        const topMap = new Map(top10.map(i => [i.name, i.score]));
+
+        // 每个剧本的核心指标（5个）+ 文案
+        const profiles = [
+            {
+                name: '年少成名型',
+                keys: ['额头饱满度','眼睛明亮度','鼻梁立体度','唇形饱满度','眉形清晰度'],
+                desc: '你的脸上写着"天赋"两个字。额头饱满意味着思维活跃，眼睛明亮代表洞察敏锐，鼻梁挺拔说明目标感极强——这些特征组合在一起，就是典型的"别人家的孩子"。你不需要等到中年才证明自己，你的才华会在很年轻的时候就被人看见。',
+                future: '<strong>人生剧本：</strong><br><strong>25岁前你就会迎来第一个高光时刻</strong>，可能是一次升学、一场比赛、一个作品，让你进入更大的舞台。30岁前完成原始积累不是难事，但你需要警惕"年少成名陷阱"——别因为早期的顺利就停止进化。<strong>财富模式是"天赋变现"</strong>，你的专业能力和个人品牌就是你的提款机。感情上你容易吸引仰慕者，但要找一个能平视你、而非仰望你的人。'
+            },
+            {
+                name: '人脉王型',
+                keys: ['眼周亲和力','笑容感染力','唇形饱满度','太阳穴饱满度','眉心舒展度'],
+                desc: '你的面部特征有一个显著的共同点：所有与人际吸引力相关的指标都在发光。眼周的亲和力让人想靠近你，笑容的感染力让人记住你，唇形的饱满度让人觉得你值得信赖。你不是那种单打独斗的类型，你的战场在人群之中。',
+                future: '<strong>人生剧本：</strong><br>你这辈子最大的资产不是存款，而是通讯录里那些愿意接你电话的人。<strong>30岁后你的人脉网络会进入爆发期</strong>，之前帮过的人、交过的朋友，会在关键时刻为你打开一扇又一扇门。建议你选择销售、公关、社群运营、自媒体等"以人为核心"的行业。<strong>财富模式是"关系变现"</strong>，维护好人脉的ROI远高于任何理财产品。感情上你是天生的伴侣型人格，婚姻幸福度极高。'
+            },
+            {
+                name: '创业领袖型',
+                keys: ['鼻梁立体度','颧骨协调度','鼻尖突出度','鼻翼清晰度','下巴稳定度'],
+                desc: '你的面部特征组合是教科书级别的"老板相"。鼻梁立体代表目标感，颧骨协调代表领导力，鼻尖突出说明商业嗅觉敏锐，下巴稳重意味着抗压能力强。你不是为朝九晚五而生的，你的天花板在"自己做主"的位置上。',
+                future: '<strong>人生剧本：</strong><br><strong>32-38岁是你创业的黄金窗口期</strong>，此时的你既有足够的行业经验，又有未被磨灭的理想主义。你适合从0到1地创建一些东西，而不是在别人搭建好的体系里做螺丝钉。前两次尝试可能会有挫折，但第三次成功的概率极高。<strong>财富模式是"股权变现"</strong>，你的真正财富不是工资，而是你创造的那个组织的价值。感情上你需要一个能理解你野心的伴侣。'
+            },
+            {
+                name: '一路顺遂型',
+                keys: ['面部对称度','笑容感染力','眼周亲和力','面部均衡度','五官和谐度'],
+                desc: '你的面部特征透露出一种令人嫉妒的"顺畅感"。面部对称代表根基稳固，笑容感染力让你人缘爆棚，眼周亲和力让你走到哪都受欢迎，五官均衡说明各方面没有明显短板。你的人生更像是坐上了顺风车——不是说你不努力，而是你的努力总能被命运温柔以待。',
+                future: '<strong>人生剧本：</strong><br>你的人生曲线大概率是<strong>平滑上升型</strong>，不会有毁灭性的打击，也不会有大起大落的颠簸。25-40岁期间，你会按部就班地升职、加薪、成家，每一步都踩在正确的节奏上。<strong>财富模式是"复利累积"</strong>，你可能不会一夜暴富，但你的净资产会稳定且持续地增长。感情上一帆风顺，伴侣关系和谐，子女缘深。'
+            },
+            {
+                name: '技术大拿型',
+                keys: ['额头饱满度','眼睛明亮度','耳位发育度','额头平滑度','眉形清晰度'],
+                desc: '你的面部特征指向一个清晰的定位：专业领域的权威。额头饱满说明学习能力超群，眼睛明亮代表洞察细节的能力极强，眉形清晰意味着做事有条理——这三项组合在一起，就是典型的"专家脸"。你在自己的领域里，是别人遇到难题时第一个想到的人。',
+                future: '<strong>人生剧本：</strong><br><strong>28-35岁是你建立专业壁垒的关键期</strong>，这段时间你需要在一个细分领域做到前5%。35岁后你会进入"收租期"——你的专业声誉会为你带来源源不断的咨询、授课、合作邀请。<strong>财富模式是"专业溢价"</strong>，越老越值钱是你最大的优势。建议你选择技术、研究、医疗、法律、金融等需要深度积累的行业。感情上你需要一个欣赏你专注力的伴侣。'
+            },
+            {
+                name: '艺术灵魂型',
+                keys: ['眉心舒展度','眼距协调度','面龄年轻度','唇形饱满度','五官和谐度'],
+                desc: '你的面部特征散发着一种难以言喻的"美感"。眉心舒展代表审美开阔，眼距协调意味着视觉判断精准，面龄年轻说明你对新鲜事物保持敏感——这些特征让你天生具备发现美、创造美的能力。你不是为重复性劳动而生的。',
+                future: '<strong>人生剧本：</strong><br>你适合一切与"美"相关的领域：设计、摄影、时尚、内容创作、品牌营销……<strong>30岁前你可能经历多次尝试和转换</strong>，这是正常的——你需要找到最适合自己的表达方式。35岁后会进入创作黄金期。<strong>财富模式是"审美变现"</strong>，在这个视觉为王的时代，你的眼光本身就是稀缺资源。感情上你容易与艺术气质的人产生共鸣。'
+            },
+            {
+                name: '家庭幸福型',
+                keys: ['太阳穴饱满度','眉眼间距度','下眼睑饱满度','人中比例度','耳垂饱满度'],
+                desc: '你的面部特征有一个温暖的主题：家。太阳穴饱满代表感情顺遂，眉眼间距适中说明家庭观念强，下眼睑饱满意味着与晚辈缘分深厚——这些特征预示着你拥有一个很多人梦寐以求的东西：一个温暖、稳定、充满爱的家庭。',
+                future: '<strong>人生剧本：</strong><br>你的<strong>幸福感来源主要来自家庭而非事业</strong>，这不是缺陷，而是天赋。你可能会选择一个相对稳定的工作，把更多精力投入家庭建设——而这个选择会让你成为最幸福的人。<strong>财富模式是"稳定增值"</strong>，你会在房产、储蓄、子女教育等方面做出极其明智的长期决策。30岁前后成家，婚姻质量极高，晚年生活被家人环绕。'
+            },
+            {
+                name: '先苦后甜型',
+                keys: ['下巴稳定度','气色健康度','耳前饱满度','人中比例度','鼻根立体度'],
+                desc: '你的面部特征讲述着一个"先付出，后收获"的故事。下巴稳重代表能承受压力，气色健康说明身体底子好，耳前饱满意味着根基稳固——这些都不是"锦上添花"的特征，而是"雪中送炭"的保障。你前半生可能会比同龄人更辛苦，但后半生你会比同龄人更舒服。',
+                future: '<strong>人生剧本：</strong><br>25-35岁是你最辛苦的阶段，你可能要同时打几份工、熬很多夜、受很多委屈。<strong>但请相信，这些辛苦不会白费</strong>。35岁后你开始进入收获期，之前的积累一笔一笔地回报你。45岁后的生活质量会显著高于同龄人。<strong>财富模式是"先存后花"</strong>，你年轻时的节俭和储蓄，会在中年变成让你从容选择的底气。感情上你是晚婚但幸福的类型。'
+            },
+            {
+                name: '大器晚成型',
+                keys: ['下巴稳定度','鼻根立体度','面部均衡度','五官和谐度','气色健康度'],
+                desc: '你的面部特征写着"后劲"两个字。额头和鼻梁或许不是最抢眼的，但下巴的稳重感、五官的均衡度，透露出一个核心信息：你是一个越沉淀越值钱的人。年轻时你可能不是人群中最亮眼的，但这恰恰是命运给你的保护机制——太早成功反而容易迷失。',
+                future: '<strong>人生剧本：</strong><br>25-30岁是你默默扎根的阶段，收入可能不高，但你在积累别人看不见的能力。<strong>35岁是你命运的第一个转折点</strong>，之前的所有积累开始产生复利效应，职级、收入、社会地位会在短时间内连跳几级。40岁后进入收获期，你很可能成为同龄人中最被尊敬的那一批。<strong>财富模式是"延迟满足"</strong>——前面所有的忍耐，都会在后面加倍奉还。感情稳定且长久。'
+            },
+            {
+                name: '跨界高手型',
+                keys: ['额头饱满度','鼻梁立体度','笑容感染力','眼周亲和力','五官和谐度'],
+                desc: '你的面部特征有一个罕见的特点："全面"。你既有才华类的指标，又有领导力类的指标，还有人缘类的指标，同时五官整体又非常和谐。这意味着你不是"专才"，而是"通才"——你能在多个领域之间自由切换。这个时代最稀缺的就是你这种"多面手"。',
+                future: '<strong>人生剧本：</strong><br>你的人生不会只有一条主线，而是<strong>多条支线并行发展</strong>。你可能白天是工程师，晚上是博主；或者主业是律师，副业是投资人。<strong>30-40岁是你跨界整合的黄金期</strong>，不同领域的经验会在这个时期产生化学反应，让你突然爆发。<strong>财富模式是"多元收入"</strong>，你的收入来源会有3-5条，任何一条出问题都不会影响大局。感情上你欣赏同样有趣的灵魂。'
+            },
+            {
+                name: '逆袭主角型',
+                keys: ['鼻根立体度','下巴稳定度','气色健康度','人中比例度','耳前饱满度'],
+                desc: '你的面部特征不是那种"天生一手好牌"的类型，但这恰恰是最好看的故事开局。你有一些指标并不突出，但鼻根、下巴、气色这些"后劲型"指标在为你暗暗蓄力。你的人生是一部先抑后扬的逆袭剧——起点普通，但终点惊艳。',
+                future: '<strong>人生剧本：</strong><br>25岁前你可能感到迷茫甚至自卑，觉得自己处处不如人。<strong>但请相信，你的后发优势会在30岁后显现</strong>。当别人因为早期的顺利而停滞时，你因为早期的挣扎而积累了更深厚的内功。35岁后你会进入快速上升通道，40岁时回头看，你会发现自己已经超越了绝大多数同龄人。<strong>财富模式是"弯道超车"</strong>，你的爆发期来得晚，但来得猛。感情上你会吸引那些欣赏你韧性的伴侣。'
+            }
+        ];
+
+        // 计算每个剧本的匹配分：匹配数 * 15 + 匹配指标平均分
+        let best = null, bestScore = -1;
+        for (const p of profiles) {
+            let matched = 0, total = 0;
+            for (const k of p.keys) {
+                if (topMap.has(k)) {
+                    matched++;
+                    total += topMap.get(k);
+                }
+            }
+            const score = matched * 15 + (matched > 0 ? total / matched : 0);
+            if (score > bestScore) {
+                bestScore = score;
+                best = p;
+            }
+        }
+
+        // 如果最高匹配分太低（<130），用厚积薄发兜底
+        if (bestScore < 130) {
+            return {
+                title: '厚积薄发型',
+                desc: '你的面部特征透露出一个明确的信号：你是一块需要时间去打磨的玉。你的各项指标没有哪一项特别夸张地高，但也没有明显的短板——这种"均衡而有潜力"的面相，是最具可塑性的类型。你的人生轨迹不会是戏剧性的跳跃，而是稳健的、持续的、可预期的上升。',
+                future: '<strong>人生剧本：</strong><br>你的人生座右铭应该是<strong>"慢慢来，比较快"</strong>。25-30岁建立基础，30-40岁稳步上升，40岁后进入收获期。你不会有一夜暴富的惊喜，但也不会有一夜返贫的风险。<strong>财富模式是"稳健增值"</strong>，坚持定投、坚持储蓄、坚持提升技能，时间会站在你这边。感情上你会拥有细水长流式的幸福，伴侣是你最坚实的后盾。'
+            };
+        }
+
+        return { title: best.name, desc: best.desc, future: best.future };
+    }
+function generateTips(typeTitle) {
+        const baseTips = [
+            '保持充足睡眠，让面部气色更加红润有光泽',
+            '多微笑，嘴角上扬最能吸引好感',
+            '饮食清淡、作息规律，面色红润让形象更健康有活力'
+        ];
+        const typeTips = {
+            '大器晚成型': [
+                '现阶段不必焦虑于同龄人的领先，你的赛道在后面',
+                '选择一个需要长期积累的行业，时间会成为你的盟友',
+                '35岁前重点投资自己，而不是追求即时回报'
+            ],
+            '年少成名型': [
+                '珍惜早期的顺利，但不要因为顺利就停止进化',
+                '学会处理关注和压力，这是成名的必修课',
+                '找一个能"接得住"你的圈子，远离消耗你的人'
+            ],
+            '人脉王型': [
+                '每年主动认识30个新朋友，维护好核心社交圈',
+                '选择以人为核心的事业，你的亲和力就是核心竞争力',
+                '记住：人脉不是认识多少人，而是多少人愿意帮你'
+            ],
+            '创业领袖型': [
+                '32岁前积累行业经验和人脉，为创业做准备',
+                '前两次创业失败是正常的，第三次成功概率极高',
+                '找一个互补型合伙人，弥补你的短板'
+            ],
+            '一路顺遂型': [
+                '你的顺利是天赋，但不要因此变得保守',
+                '在顺遂时做好风险储备，为不可预测的未来留后路',
+                '感恩命运的眷顾，但不要把运气当成实力'
+            ],
+            '技术大拿型': [
+                '选一个细分领域做到前5%，建立不可替代性',
+                '35岁前完成从"执行者"到"专家"的转型',
+                '多输出专业内容，让你的名字成为行业标签'
+            ],
+            '艺术灵魂型': [
+                '30岁前允许自己多次尝试，找到最适合的表达方式',
+                '建立个人作品集，让你的审美被更多人看见',
+                '不要低估"审美"的商业价值，这个时代愿意为美感付费'
+            ],
+            '家庭幸福型': [
+                '把家庭当成最重要的投资项目，回报率远超股票',
+                '选择一个能平衡工作和家庭的职业路径',
+                '早点成家，你的伴侣是你人生最大的杠杆'
+            ],
+            '先苦后甜型': [
+                '25-35岁的辛苦是在为45岁后的自由存钱',
+                '学会储蓄和理财，年轻时的本金决定晚年的选择权',
+                '身体是革命的本钱，再忙也要照顾好健康'
+            ],
+            '跨界高手型': [
+                '不要把自己框死在单一领域，保持探索的好奇心',
+                '培养2-3个能变现的副业，分散收入风险',
+                '30岁后寻找不同领域之间的交叉点，那里有你最大的机会'
+            ],
+            '逆袭主角型': [
+                '25岁前的普通是正常的，不要因此否定自己',
+                '把每一次挫折当成积累，你的内功比同龄人更深',
+                '找一个相信你的人，TA会在你逆袭路上给你最关键的推动'
+            ],
+            '厚积薄发型': [
+                '制定10年长期规划，你的优势在于耐力而非爆发力',
+                '每年学一项新技能，复利效应会在10年后显现',
+                '选择稳健的投资策略，时间会让你的财富自然增长'
+            ]
+        };
+        return [...(typeTips[typeTitle] || typeTips['厚积薄发型']), ...baseTips].slice(0, 5);
+    }
+function drawRadarChart(scores) {
+            const cv = document.getElementById('radarChart');
+            const c = cv.getContext('2d');
+            const W = cv.width, H = cv.height;
+            const cx = W / 2, cy = H / 2, R = 110;
+            c.clearRect(0, 0, W, H);
+
+            const labels = Object.keys(scores);
+            const values = Object.values(scores);
+            const n = labels.length;
+            const step = (Math.PI * 2) / n;
+
+            // 背景网格
+            for (let ring = 1; ring <= 5; ring++) {
+                const r = R * ring / 5;
+                c.beginPath();
+                for (let i = 0; i <= n; i++) {
+                    const angle = -Math.PI / 2 + step * i;
+                    const x = cx + r * Math.cos(angle);
+                    const y = cy + r * Math.sin(angle);
+                    i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+                }
+                c.closePath();
+                c.strokeStyle = `rgba(255,255,255,${ring === 5 ? 0.12 : 0.05})`;
+                c.lineWidth = 1;
+                c.stroke();
+            }
+
+            // 辐射线
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                c.beginPath();
+                c.moveTo(cx, cy);
+                c.lineTo(cx + R * Math.cos(angle), cy + R * Math.sin(angle));
+                c.strokeStyle = 'rgba(255,255,255,0.06)';
+                c.stroke();
+            }
+
+            // 数据区域
+            const grad = c.createLinearGradient(cx - R, cy - R, cx + R, cy + R);
+            grad.addColorStop(0, 'rgba(167, 139, 250, 0.35)');
+            grad.addColorStop(1, 'rgba(244, 114, 182, 0.35)');
+
+            c.beginPath();
+            for (let i = 0; i <= n; i++) {
+                const idx = i % n;
+                const angle = -Math.PI / 2 + step * idx;
+                const val = values[idx] / 100;
+                const x = cx + R * val * Math.cos(angle);
+                const y = cy + R * val * Math.sin(angle);
+                i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+            }
+            c.closePath();
+            c.fillStyle = grad;
+            c.fill();
+            c.strokeStyle = 'rgba(167, 139, 250, 0.8)';
+            c.lineWidth = 2;
+            c.stroke();
+
+            // 数据点
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                const val = values[i] / 100;
+                const x = cx + R * val * Math.cos(angle);
+                const y = cy + R * val * Math.sin(angle);
+                c.beginPath();
+                c.arc(x, y, 4, 0, Math.PI * 2);
+                c.fillStyle = '#c4b5fd';
+                c.fill();
+                c.strokeStyle = 'white';
+                c.lineWidth = 1.5;
+                c.stroke();
+            }
+
+            // 标签
+            c.font = '12px -apple-system, sans-serif';
+            c.fillStyle = 'rgba(255,255,255,0.6)';
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + step * i;
+                const x = cx + (R + 24) * Math.cos(angle);
+                const y = cy + (R + 24) * Math.sin(angle);
+                c.fillText(labels[i], x, y);
+            }
+        }
+function renderLegend(scores) {
+            const colors = ['#a78bfa', '#f472b6', '#fb923c', '#4ade80', '#f87171', '#60a5fa', '#f9a8d4', '#fbbf24'];
+            let html = '';
+            let i = 0;
+            for (const [name, score] of Object.entries(scores)) {
+                html += `
+                    <div class="legend-item">
+                        <span class="legend-label">${name}</span>
+                        <div class="legend-bar-wrap">
+                            <div class="legend-bar" style="background: ${colors[i % colors.length]};" data-width="${score}%"></div>
+                        </div>
+                        <span class="legend-value">${score}</span>
+                    </div>`;
+                i++;
+            }
+            document.getElementById('radarLegend').innerHTML = html;
+
+            // 动画触发
+            setTimeout(() => {
+                document.querySelectorAll('.legend-bar').forEach(bar => {
+                    bar.style.width = bar.dataset.width;
+                });
+            }, 100);
+        }
+function animateScore(from, to, duration) {
+            const el = document.getElementById('totalScore');
+            const start = performance.now();
+            function tick(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(from + (to - from) * eased);
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        }
+function getScoreDesc(score) {
+            if (score >= 90) return "你的美很有辨识度，让人过目难忘";
+            if (score >= 80) return "你有着独特的气质，越来越耐看";
+            if (score >= 70) return "你有自己的闪光点，找到风格会更出彩";
+            return "每个人都是潜力股，找到适合的方式就能发光";
+        }
+function getStars(score) {
+            const full = Math.floor(score / 20);
+            const half = score % 20 >= 10 ? 1 : 0;
+            return '★'.repeat(full) + (half ? '☆' : '') + '☆'.repeat(Math.max(0, 5 - full - half));
+        }
+function generateRecommendations(faceType, scores, browType, lipType, intensityType) {
+            const recs = [];
+            recs.push('💡 护肤基础：早晚清洁+保湿+防晒，好皮肤是颜值的底色');
+            recs.push('💡 作息调整：保证7-8小时睡眠，熬夜是颜值的最大杀手');
+
+            if (faceType.name.includes('丰润')) {
+                recs.push('💄 唇妆：选择豆沙色、枫叶色等深色唇膏，避免荧光色');
+                recs.push('💄 修容：高光打在下巴尖和鼻梁，侧影从耳际扫向嘴角');
+                recs.push('👗 发型：侧分长卷发或八字刘海，露出额头更显气质');
+            } else if (faceType.name.includes('柔和')) {
+                recs.push('💄 唇妆：选择珊瑚色、玫瑰豆沙等饱满唇色');
+                recs.push('💄 高光：重点打在T区和面中，增加饱满感');
+                recs.push('👗 发型：空气刘海或蓬松卷发，增加柔和感');
+            } else if (faceType.name === '直面型') {
+                recs.push('💄 妆容：脸型标准！日系清透、韩系水光、欧美立体都适合');
+                recs.push('👗 穿搭：基本不挑衣服，根据身材优势选择风格');
+            } else if (faceType.name.includes('微凸')) {
+                recs.push('💄 妆容：强调眉眼，弱化唇部，眼线稍上扬增加灵气');
+                recs.push('👗 穿搭：简约大气风格更凸显气质');
+            } else if (faceType.name.includes('立体')) {
+                recs.push('💄 妆容：重点打造眉眼，眼线拉长眼型转移焦点');
+                recs.push('👗 发型：侧分长发最佳，微微低头找最佳角度');
+            }
+
+            if (scores['眼睛形态'] < 80) {
+                recs.push('👁 眼妆：内眼线填满睫毛根部，眼尾稍上扬');
+            } else {
+                recs.push('👁 眼妆优势：眼睛很有神！可以尝试各种眼影配色');
+            }
+            if (scores['鼻子立体'] < 80) {
+                recs.push('👃 鼻影：从眼窝向鼻梁轻扫，鼻头画小V字');
+            }
+
+            if (browType) {
+                recs.push('🖌 眉形：' + browType.suggestion);
+            }
+
+            // 唇形专属建议
+            if (lipType) {
+                recs.push('👄 唇色推荐：' + lipType.colorRec);
+                recs.push('👄 唇妆技巧：' + lipType.suggestion);
+
+                // 根据唇形类型给出额外护理建议
+                if (lipType.name === '薄唇') {
+                    recs.push('👄 唇部丰盈：睡前涂厚唇膜，日常用含薄荷成分的唇蜜增加视觉饱满感');
+                } else if (lipType.name === '厚唇/欧美唇') {
+                    recs.push('👄 唇部修饰：用遮瑕轻拍唇外缘可缩小轮廓，哑光质地比水光更日常');
+                } else if (lipType.name === '嘟嘟唇') {
+                    recs.push('👄 唇部保养：保持唇部水润是关键！定期去角质+唇膜，让嘟嘟感更精致');
+                } else if (lipType.name === '微笑唇') {
+                    recs.push('👄 嘴角维护：用遮瑕提亮嘴角，搭配咬唇妆效果最甜美');
+                } else if (lipType.name === 'M唇/花瓣唇') {
+                    recs.push('👄 唇峰强调：沿天然M形唇峰精准描绘，用哑光唇膏最能体现唇形轮廓');
+                } else if (lipType.name === '樱桃唇') {
+                    recs.push('👄 唇部放大：唇中央叠涂浅色/亮色唇蜜，打造视觉放大效果');
+                } else if (lipType.name === '鹅蛋唇/椭圆唇') {
+                    recs.push('👄 百搭唇形：你的唇形什么颜色都能驾驭，根据场合和心情自由选色');
+                } else if (lipType.name === '平直唇') {
+                    recs.push('👄 唇形利用：保持平直线条的利落感，哑光裸色系最能体现中性高级气质');
+                }
+            }
+
+            recs.push('👠 身形：高腰裤/裙提高腰线，全身颜色不超过3种');
+
+            // 浓淡颜专属建议
+            if (intensityType) {
+                recs.push('🎭 浓淡颜妆容：' + intensityType.makeupTips);
+                recs.push('🎭 浓淡颜穿搭：' + intensityType.styleTips);
+            }
+
+            recs.push('💖 最重要：自信是最好的妆容！站直、微笑、眼神坚定');
+            return recs;
+        }
+﻿
+// ==================== 新增分析函数 ====================
+function determineFaceType(m) {
+  var lipPos = m.pts[51];
+  var noseTip = m.pts[30];
+  var chin = m.pts[8];
+  var browMid = m.pts[27];
+  var ratio = (lipPos.y - browMid.y) / (chin.y - browMid.y);
+  var keys = Object.keys(faceTypes);
+  if (ratio < 0.42) return faceTypes.straight;
+  if (ratio < 0.47) return faceTypes.slightlyConvex;
+  if (ratio < 0.52) return faceTypes.convex;
+  if (ratio < 0.56) return faceTypes.slightlyConcave;
+  if (ratio < 0.60) return faceTypes.concave;
+  return faceTypes.fengjie;
 }
 
-function getComboDesc(a, b) {
-  const key = [a, b].sort().join('_');
-  const map = {
-    'fa_se': '你对美有欲望，但不只是想看——你想碰，想突破边界，想把那种美占为己有。普通的欣赏满足不了你。',
-    'quan_zhan': '你想要的是掌控，不只是局面，还有人。你需要说了算，也需要对方只有你。这两种欲望加在一起，让你在关系里有极大的存在感。',
-    'chu_fa': '你的身体是你最诚实的欲望出口。刺激、触碰、边界感——你同时需要这几样东西才能感受到真实的活着。',
-    'se_zhan': '你喜欢好看的人，还想把他占住。你的眼光是欲望的起点，你的占有欲是欲望的归宿。',
-    'ming_quan': '你不只想知道命运是什么，你还想提前布局，转动它的方向。你既想看透，又想掌控，两者加在一起，你是那种让人觉得"深不可测"的人。',
-    'sheng_chu': '声音和触觉对你来说是同一件事——都是感受到对方"真实在"的方式。你需要被听见，也需要被碰到。',
-    'yi_shi': '你理想的状态是：躺着，有好吃的，没人打扰你。你不是在逃避，你只是在以自己的方式把生活过满。',
-    'tan_quan': '你想要的东西越来越多，你想掌控的范围越来越大。欲望和野心是你前进的发动机，停下来对你来说是一种惩罚。',
+function determineBrowType(m) {
+  var browStart = m.pts[17];
+  var browEnd = m.pts[26];
+  var browPeakL = m.pts[19];
+  var browPeakR = m.pts[24];
+  var peakL = Math.abs(browStart.y - browPeakL.y);
+  var peakR = Math.abs(browEnd.y - browPeakR.y);
+  var avgPeak = (peakL + peakR) / 2;
+  var browLen = dist(browStart, browEnd);
+  var peakRatio = avgPeak / browLen;
+  var endDrop = browEnd.y > browStart.y ? (browEnd.y - browStart.y) / browLen : 0;
+  if (peakRatio > 0.18 && endDrop > 0.05) return browTypes.drooping;
+  if (peakRatio > 0.20 && browEnd.y < browStart.y) return browTypes.sword;
+  if (peakRatio > 0.18) return browTypes.peaked;
+  if (peakRatio > 0.12) return browTypes.arched;
+  if (peakRatio < 0.06) return browTypes.flat;
+  if (peakRatio < 0.10 && browLen / m.faceWidth > 0.22) return browTypes.willow;
+  return browTypes.wild;
+}
+
+function determineLipType(m) {
+  var upperH = m.upperLipH;
+  var lowerH = m.lowerLipH;
+  var totalH = upperH + lowerH;
+  var ratio = lowerH / (upperH || 1);
+  var mouthW = m.mouthW;
+  var lipFullness = totalH / m.faceHeight;
+  var mShape = Math.abs(m.pts[51].y - (m.pts[48].y + m.pts[54].y) / 2);
+  if (mShape > mouthW * 0.08 && lipFullness > 0.04) return lipTypes.mPetal;
+  if (m.mouthUp > 0.7) return lipTypes.smile;
+  if (ratio > 1.6 && lowerH > upperH * 1.4) return lipTypes.pouty;
+  if (lipFullness > 0.065) return lipTypes.thick;
+  if (lipFullness < 0.028) return lipTypes.thin;
+  if (mouthW / m.faceWidth < 0.28 && lipFullness > 0.035) return lipTypes.cherry;
+  if (mShape < mouthW * 0.03) return lipTypes.flat;
+  return lipTypes.oval;
+}
+
+function determineIntensity(m, indicators) {
+  var topInd = indicators.slice().sort(function(a,b){return b.score-a.score;}).slice(0,10);
+  var strongSignals = 0, lightSignals = 0;
+  var noseStereo = m.noseH / m.faceHeight;
+  var eyeSize = m.avgEyeW / m.faceWidth;
+  var browDensity = dist(m.pts[17], m.pts[21]) / m.faceWidth;
+  if (noseStereo > 0.24) strongSignals += 2; else lightSignals += 2;
+  if (eyeSize > 0.09) strongSignals += 1; else lightSignals += 1;
+  if (browDensity > 0.10) strongSignals += 1; else lightSignals += 1;
+  topInd.forEach(function(ind) {
+    if (['鼻梁立体度','颧骨协调度','眼睛明亮度'].indexOf(ind.name) >= 0) strongSignals++;
+    if (['面部均衡度','面龄年轻度','眉心舒展度'].indexOf(ind.name) >= 0) lightSignals++;
+  });
+  var total = strongSignals + lightSignals;
+  var sPct = Math.round(strongSignals / total * 100);
+  var lPct = 100 - sPct;
+  var type;
+  if (sPct >= 65) type = faceIntensityTypes.strong;
+  else if (lPct >= 65) type = faceIntensityTypes.light;
+  else if (sPct > lPct) type = faceIntensityTypes.strongLight;
+  else type = faceIntensityTypes.lightStrong;
+  return { type: type, strongPct: sPct, lightPct: lPct };
+}
+
+function extractFaceFeatures(det, m) {
+  var pts = m.pts;
+  var jawPoints = pts.slice(0, 17);
+  var rightEyebrow = pts.slice(17, 22);
+  var leftEyebrow = pts.slice(22, 27);
+  var noseBridge = pts.slice(27, 31);
+  var noseBase = pts.slice(31, 36);
+  var rightEye = pts.slice(36, 42);
+  var leftEye = pts.slice(42, 48);
+  var outerLip = pts.slice(48, 60);
+  var innerLip = pts.slice(60, 68);
+
+  function getDistance(p1, p2) { return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)); }
+  function getCenter(pts) { return { x: pts.reduce((s,p)=>s+p.x,0)/pts.length, y: pts.reduce((s,p)=>s+p.y,0)/pts.length }; }
+  function eyeArea(eye) { return getDistance(eye[0], eye[3]) * getDistance(getCenter([eye[1],eye[2]]), getCenter([eye[4],eye[5]])); }
+  function faceArea(jaw) { return getDistance(jaw[0], jaw[16]) * getDistance(jaw[8], jaw[0]); }
+  function jawAngles(jaw) { let s=0; for(let i=2;i<jaw.length-2;i++){ let a=getDistance(jaw[i-1],jaw[i]), b=getDistance(jaw[i],jaw[i+1]), c=getDistance(jaw[i-1],jaw[i+1]); let ang=Math.acos((a*a+b*b-c*c)/(2*a*b))*180/Math.PI; s+=Math.abs(ang-180); } return s/(jaw.length-4); }
+  function eyebrowArch(eb) { let ys=eb.map(p=>p.y); return (Math.max(...ys)-Math.min(...ys))/getDistance(eb[0],eb[4]); }
+
+  var features = {
+    faceWidthHeightRatio: getDistance(jawPoints[0], jawPoints[16]) / getDistance(pts[27], jawPoints[8]),
+    eyeDistanceRatio: getDistance(getCenter(rightEye), getCenter(leftEye)) / getDistance(jawPoints[0], jawPoints[16]),
+    eyeSizeRatio: ((eyeArea(rightEye)+eyeArea(leftEye))/2) / faceArea(jawPoints),
+    noseHeightRatio: getDistance(noseBridge[0], noseBase[2]) / getDistance(jawPoints[8], jawPoints[0]),
+    noseWidthRatio: getDistance(noseBase[0], noseBase[4]) / getDistance(jawPoints[0], jawPoints[16]),
+    jawRoundness: 1 - (jawAngles(jawPoints) / 180),
+    foreheadRatio: getDistance(pts[27], pts[19]) / getDistance(pts[27], pts[8]),
+    lipThickness: (getDistance(outerLip[2], innerLip[2]) + getDistance(outerLip[8], innerLip[8])) / 2 / getDistance(jawPoints[0], jawPoints[16]),
+    eyebrowShape: (eyebrowArch(rightEyebrow) + eyebrowArch(leftEyebrow)) / 2,
+    cheekboneProminence: getDistance(pts[1], pts[15]) / getDistance(pts[3], pts[13])
   };
-  return map[key] || null;
+
+  // 归一化到 0-1
+  var ranges = {
+    faceWidthHeightRatio:[0.5,1.2], eyeDistanceRatio:[0.3,0.6], eyeSizeRatio:[0.01,0.08],
+    noseHeightRatio:[0.2,0.6], noseWidthRatio:[0.15,0.4], jawRoundness:[0.3,0.9],
+    foreheadRatio:[0.2,0.6], lipThickness:[0.01,0.08], eyebrowShape:[0.02,0.12],
+    cheekboneProminence:[0.6,1.2]
+  };
+  var normalized = {};
+  for(var k in features){
+    if(ranges[k]){ var v=(features[k]-ranges[k][0])/(ranges[k][1]-ranges[k][0]); normalized[k]=Math.max(0,Math.min(1,v)); }
+    else normalized[k]=features[k];
+  }
+
+  // 添加年龄、性别、表情（如果可用）
+  if(det.age) normalized.age = Math.max(0, Math.min(1, det.age / 80));
+  if(det.gender) normalized.gender = det.gender === 'male' ? 0 : 1;
+  if(det.expressions){
+    normalized.happy = det.expressions.happy || 0;
+    normalized.sad = det.expressions.sad || 0;
+    normalized.angry = det.expressions.angry || 0;
+    normalized.neutral = det.expressions.neutral || 0;
+  }
+  return normalized;
 }
 
-function retryTest() {
-  initScores();
-  currentQ = 0;
-  answers = {};
-  document.getElementById('result-page').style.display = 'none';
-  document.getElementById('cover-page').style.display = 'flex';
-  document.getElementById('progress-bar').style.width = '0%';
+function calculateSimilarity(userFeatures, starFeatures) {
+  var weights = {
+    faceWidthHeightRatio:0.15, eyeDistanceRatio:0.12, noseHeightRatio:0.10,
+    jawRoundness:0.13, foreheadRatio:0.08, lipThickness:0.10,
+    eyebrowShape:0.08, cheekboneProminence:0.12, age:0.05, gender:0.07
+  };
+  var totalWeight=0, weightedSum=0;
+  for(var k in weights){
+    if(userFeatures[k]!==undefined && starFeatures[k]!==undefined){
+      var diff = Math.abs(userFeatures[k]-starFeatures[k]);
+      var sim = Math.max(0, 1 - diff);
+      weightedSum += sim * weights[k];
+      totalWeight += weights[k];
+    }
+  }
+  var finalSim = totalWeight > 0 ? weightedSum / totalWeight : 0;
+  return Math.pow(finalSim, 1.5);
 }
 
-function copyWechat() {
-  const id = 'xingzuofenxi1';
-  navigator.clipboard.writeText(id).then(() => {
-    const tip = document.getElementById('copy-tip');
-    tip.textContent = '已复制！去微信搜一搜吧 ✔';
-    tip.style.color = '#c9a84c';
-    setTimeout(() => {
-      tip.textContent = '点击复制微信号';
-      tip.style.color = '#c9a84c66';
-    }, 2000);
-  }).catch(() => {
-    const tip = document.getElementById('copy-tip');
-    tip.textContent = '微信号：xingzuofenxi1';
-    tip.style.color = '#c9a84c';
+function getCelebMatches(det, m) {
+  var userFeatures = extractFaceFeatures(det, m);
+  var matches = [];
+  for(var i=0; i<celebrityArchetypes.length; i++){
+    var arc = celebrityArchetypes[i];
+    var sim = calculateSimilarity(userFeatures, arc.features);
+    matches.push({ archetype: arc, similarity: sim });
+  }
+  matches.sort((a,b)=>b.similarity-a.similarity);
+
+  // 转换为百分比并分层，确保第一名足够突出
+  var tiers = [{min:88,max:96},{min:78,max:86},{min:68,max:76},{min:58,max:66},{min:48,max:56}];
+  return matches.slice(0, 5).map((match, idx)=>{
+    var tier = tiers[idx] || tiers[4];
+    var baseSim = tier.min + (match.similarity % 1) * (tier.max - tier.min);
+    return {
+      name: match.archetype.name,
+      tag: match.archetype.tag,
+      desc: match.archetype.desc,
+      rep: match.archetype.rep,
+      pct: Math.round(baseSim)
+    };
   });
 }
 
-function saveImage() {
-  const btn = document.querySelector('.btn-save');
-  const wechat = document.querySelector('.wechat-card');
-  const retry = document.querySelector('.btn-retry');
-  btn.style.display = 'none';
-  wechat.style.display = 'none';
-  retry.style.display = 'none';
+function renderScoreCard(score) {
+  document.getElementById('totalScore').textContent = '0';
+  animateScore(0, score, 1200);
+  document.getElementById('scoreDesc').textContent = getScoreDesc(score);
+  document.getElementById('scoreStars').textContent = getStars(score);
+}
 
-  html2canvas(document.getElementById('result-page'), {
-    backgroundColor: '#0a0a0f',
-    scale: 2,
-    useCORS: true,
-    logging: false
-  }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = '我的深层欲望画像.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }).finally(() => {
-    btn.style.display = '';
-    wechat.style.display = '';
-    retry.style.display = '';
+function renderLifeCard(typeResult) {
+  document.getElementById('lifeBadge').textContent = '你的人生剧本';
+  document.getElementById('lifeTitle').textContent = typeResult.title;
+  document.getElementById('lifeDesc').textContent = typeResult.desc;
+  document.getElementById('lifeFuture').innerHTML = typeResult.future;
+}
+
+function renderCelebList(celebs) {
+  var html = '';
+  for (var i = 0; i < celebs.length; i++) {
+    var c = celebs[i];
+    var colors = ['#a78bfa','#f472b6','#fb923c','#4ade80','#60a5fa'];
+    var color = colors[i % colors.length];
+    var initial = c.name.charAt(0);
+    html += '<div class="celeb-card" style="animation-delay:' + (i * 0.1) + 's">';
+    html += '<div class="celeb-avatar" style="background:linear-gradient(135deg,' + color + ',' + color + '88)">' + initial + '</div>';
+    html += '<div class="celeb-info">';
+    html += '<div class="celeb-name">' + c.name + '<span class="celeb-pct">' + c.pct + '%</span></div>';
+    html += '<div class="celeb-tag-sm">' + c.tag + '</div>';
+    html += '<div class="celeb-rep">代表：' + c.rep + '</div>';
+    html += '<div class="celeb-desc">' + c.desc + '</div>';
+    html += '</div></div>';
+  }
+  document.getElementById('celebList').innerHTML = html;
+}
+  document.getElementById('celebList').innerHTML = html;
+}
+
+function renderFaceCard(ft) {
+  var html = '<strong style="color:#fb923c;font-size:17px;">' + ft.name + '</strong><br><br>';
+  html += ft.desc + '<br><br>';
+  html += '<strong>特征：</strong>' + ft.features;
+  document.getElementById('faceResult').innerHTML = html;
+}
+
+function renderBrowCard(bt, ft) {
+  var html = '<strong style="color:#f472b6;font-size:17px;">' + bt.name + '</strong><br><br>';
+  html += bt.desc + '<br><br>';
+  html += '<strong>适配脸型：</strong>' + bt.matchFace.join('、') + '<br><br>';
+  html += '<strong>修饰建议：</strong>' + bt.suggestion;
+  document.getElementById('browResult').innerHTML = html;
+}
+
+function renderLipCard(lt, ft) {
+  var html = '<strong style="color:#f87171;font-size:17px;">' + lt.name + '</strong><br><br>';
+  html += lt.desc + '<br><br>';
+  html += '<strong>唇形特征：</strong>' + lt.features + '<br>';
+  html += '<strong>上下唇比例：</strong>' + lt.ratio + '<br>';
+  html += '<strong>气质印象：</strong>' + lt.aura + '<br>';
+  html += '<strong>同类型美人：</strong>' + lt.celebRef + '<br><br>';
+  html += '<strong>推荐唇色：</strong>' + lt.colorRec + '<br>';
+  html += '<strong>唇妆建议：</strong>' + lt.suggestion;
+  document.getElementById('lipResult').innerHTML = html;
+}
+
+function renderIntensityCard(intResult) {
+  var t = intResult.type;
+  var html = '<strong style="color:#e879f9;font-size:17px;">' + t.name + '</strong><br><br>';
+  html += t.desc + '<br><br>';
+  html += '<div style="margin:12px 0;">';
+  html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">';
+  html += '<span style="font-size:13px;color:rgba(255,255,255,0.5);min-width:36px;">浓颜</span>';
+  html += '<div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;">';
+  html += '<div style="height:100%;width:' + intResult.strongPct + '%;background:linear-gradient(90deg,#f472b6,#ef4444);border-radius:4px;"></div></div>';
+  html += '<span style="font-size:13px;color:rgba(255,255,255,0.6);">' + intResult.strongPct + '%</span></div>';
+  html += '<div style="display:flex;align-items:center;gap:8px;">';
+  html += '<span style="font-size:13px;color:rgba(255,255,255,0.5);min-width:36px;">淡颜</span>';
+  html += '<div style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden;">';
+  html += '<div style="height:100%;width:' + intResult.lightPct + '%;background:linear-gradient(90deg,#a78bfa,#60a5fa);border-radius:4px;"></div></div>';
+  html += '<span style="font-size:13px;color:rgba(255,255,255,0.6);">' + intResult.lightPct + '%</span></div></div>';
+  html += '<strong>特征：</strong><br>';
+  for (var i = 0; i < t.features.length; i++) html += '• ' + t.features[i] + '<br>';
+  html += '<br><strong>气质：</strong>' + t.aura + '<br>';
+  html += '<strong>同类型美人：</strong>' + t.celebRef.join('、') + '<br><br>';
+  html += '<strong>妆容建议：</strong>' + t.makeupTips + '<br>';
+  html += '<strong>穿搭建议：</strong>' + t.styleTips;
+  document.getElementById('intensityResult').innerHTML = html;
+}
+
+function renderIndicators(indicators) {
+  var grid = document.getElementById('indicatorGrid');
+  var html = '';
+  for (var idx = 0; idx < indicators.length; idx++) {
+    var ind = indicators[idx];
+    html += '<div class="indicator-card" style="animation:fadeIn 0.5s ease ' + (idx * 0.03) + 's both;">';
+    html += '<div class="indicator-header"><span class="indicator-name">' + ind.name + '</span>';
+    html += '<span class="indicator-score">' + ind.score + '分</span></div>';
+    html += '<div class="progress-bar"><div class="progress-fill" style="width:' + ind.score + '%;background:linear-gradient(90deg,' + ind.color + ',#f4d03f)"></div></div>';
+    html += '<div class="indicator-content"><span class="tag tag-tradition">传统</span>' + ind.tradition + '<br>';
+    html += '<span class="tag tag-science">科学</span>' + ind.science + '<br><br>';
+    html += ind.comment;
+    html += '<div class="future-link">' + ind.future + '</div></div></div>';
+  }
+  grid.innerHTML = html;
+}
+
+function renderRecs(indicators, ft, bt, lt, intResult) {
+  var recs = generateRecommendations(ft, {}, bt, lt, intResult.type);
+  var tips = generateTips('');
+  for (var i = 0; i < tips.length; i++) recs.push('💡 ' + tips[i]);
+  var html = '';
+  for (var i = 0; i < recs.length; i++) {
+    var icon = recs[i].substring(0, 2);
+    var text = recs[i].substring(3);
+    html += '<li data-icon="' + icon + '">' + text + '</li>';
+  }
+  document.getElementById('recList').innerHTML = html;
+}
+
+﻿
+// ==================== 核心分析流程 ====================
+var modelsLoaded = false;
+var uploadedImage = null;
+
+function loadModels() {
+  var status = document.getElementById('modelStatus');
+  status.textContent = '⏳ AI模型加载中...';
+  status.className = 'model-status loading';
+  var MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/';
+  Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+    faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+    faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+  ]).then(function() {
+    modelsLoaded = true;
+    status.textContent = '✅ AI模型加载完成';
+    status.className = 'model-status loaded';
+    setTimeout(function() { status.style.display = 'none'; }, 2000);
+  }).catch(function(err) {
+    status.textContent = '❌ 模型加载失败，请刷新页面';
+    status.className = 'model-status error';
+    console.error(err);
   });
 }
+
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) return alert('请上传图片文件');
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedImage = new Image();
+    uploadedImage.onload = function() {
+      var canvas = document.getElementById('previewCanvas');
+      canvas.width = uploadedImage.width;
+      canvas.height = uploadedImage.height;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(uploadedImage, 0, 0);
+      document.getElementById('previewSection').style.display = 'block';
+      document.getElementById('uploadSection').style.display = 'none';
+    };
+    uploadedImage.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function setupUpload() {
+  var us = document.getElementById('uploadSection');
+  var fi = document.getElementById('fileInput');
+  var ci = document.getElementById('cameraInput');
+  us.addEventListener('click', function(e) {
+    if (e.target.closest('.upload-btn')) return;
+    fi.click();
+  });
+  fi.addEventListener('change', function(e) { if (e.target.files[0]) handleFile(e.target.files[0]); });
+  ci.addEventListener('change', function(e) { if (e.target.files[0]) handleFile(e.target.files[0]); });
+  us.addEventListener('dragover', function(e) { e.preventDefault(); us.style.borderColor = '#f472b6'; });
+  us.addEventListener('dragleave', function() { us.style.borderColor = ''; });
+  us.addEventListener('drop', function(e) {
+    e.preventDefault(); us.style.borderColor = '';
+    if (e.dataTransfer.files[0] && e.dataTransfer.files[0].type.startsWith('image/'))
+      handleFile(e.dataTransfer.files[0]);
+  });
+  document.getElementById('analyzeBtn').addEventListener('click', startAnalysis);
+}
+
+function startAnalysis() {
+  if (!modelsLoaded) return alert('AI模型还在加载中，请稍候...');
+  if (!uploadedImage) return;
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('previewSection').style.display = 'none';
+  document.getElementById('loadingSection').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+
+  var steps = [
+    { id: 'step1', text: '正在检测人脸区域...', pct: 20, dur: 800 },
+    { id: 'step2', text: '正在定位68个关键点...', pct: 45, dur: 900 },
+    { id: 'step3', text: '正在分析五官特征...', pct: 70, dur: 1000 },
+    { id: 'step4', text: '正在生成综合报告...', pct: 100, dur: 800 }
+  ];
+  var i = 0;
+  function nextStep() {
+    if (i > 0) {
+      document.getElementById(steps[i-1].id).classList.remove('current');
+      document.getElementById(steps[i-1].id).classList.add('done');
+    }
+    if (i >= steps.length) { setTimeout(runAnalysis, 400); return; }
+    document.getElementById(steps[i].id).classList.add('current');
+    document.getElementById('loadingStep').textContent = steps[i].text;
+    document.getElementById('loadPercent').textContent = steps[i].pct + '%';
+    var circle = document.getElementById('loadProgress');
+    circle.style.strokeDashoffset = 226 - (226 * steps[i].pct / 100);
+    i++;
+    setTimeout(nextStep, steps[i-1].dur);
+  }
+  nextStep();
+}
+
+function runAnalysis() {
+  faceapi.detectSingleFace(uploadedImage,
+    new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 })
+  ).withFaceLandmarks().withAgeAndGender().withFaceExpressions().then(function(det) {
+    if (!det) {
+      alert('未检测到人脸，请上传正面清晰的面部照片');
+      document.getElementById('loadingSection').style.display = 'none';
+      document.getElementById('previewSection').style.display = 'block';
+      document.getElementById('analyzeBtn').disabled = false;
+      return;
+    }
+    var canvas = document.getElementById('previewCanvas');
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(uploadedImage, 0, 0);
+    faceapi.draw.drawFaceLandmarks(canvas, det);
+    generateAllResults(det);
+  }).catch(function(e) {
+    alert('分析出错：' + (e.message || '未知错误'));
+    document.getElementById('loadingSection').style.display = 'none';
+    document.getElementById('previewSection').style.display = 'block';
+    document.getElementById('analyzeBtn').disabled = false;
+  });
+}
+
+function generateAllResults(det) {
+  var m = calcFaceMetrics(det.landmarks);
+  var indicators = calculateIndicators(m);
+  var lifeResult = determineType(indicators);
+  var ft = determineFaceType(m);
+  var bt = determineBrowType(m);
+  var lt = determineLipType(m);
+  var intResult = determineIntensity(m, indicators);
+  var celebs = getCelebMatches(det, m);
+
+  var avgScore = 0;
+  for (var i = 0; i < indicators.length; i++) avgScore += indicators[i].score;
+  avgScore = Math.round(avgScore / indicators.length);
+  var totalScore = Math.max(60, Math.min(99, avgScore));
+
+  renderScoreCard(totalScore);
+  renderLifeCard(lifeResult);
+  renderCelebList(celebs);
+  renderFaceCard(ft);
+  renderBrowCard(bt, ft);
+  renderLipCard(lt, ft);
+  renderIntensityCard(intResult);
+  renderIndicators(indicators);
+
+  var radarScores = {
+    '三庭比例': Math.round(100 - Math.abs(m.upperFace - m.lowerFace) / (m.upperFace + m.midFace + m.lowerFace) * 100),
+    '五眼分布': Math.round((1 - Math.abs(m.eyeDistance / m.faceWidth - 0.47) / 0.47) * 100),
+    '眼睛形态': Math.round(m.avgEyeW / m.faceWidth * 800),
+    '眉脸协调': Math.round(dist(m.pts[17], m.pts[26]) / m.faceWidth * 300),
+    '唇脸协调': Math.round((m.upperLipH + m.lowerLipH) / m.faceHeight * 1200),
+    '鼻子立体': Math.round(m.noseH / m.faceHeight * 350),
+    '唇形饱满': Math.round((m.upperLipH + m.lowerLipH) / m.faceHeight * 1200),
+    '下颌线条': Math.round(m.jawW / m.faceWidth * 250)
+  };
+  for (var k in radarScores) radarScores[k] = Math.max(55, Math.min(99, radarScores[k]));
+  setTimeout(function() { drawRadarChart(radarScores); }, 300);
+  renderLegend(radarScores);
+  renderRecs(indicators, ft, bt, lt, intResult);
+
+  document.getElementById('loadingSection').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('analyzeBtn').disabled = false;
+  ['step1','step2','step3','step4'].forEach(function(id) {
+    document.getElementById(id).classList.remove('done','current');
+  });
+  document.getElementById('loadProgress').style.strokeDashoffset = 226;
+  document.getElementById('loadPercent').textContent = '0%';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ==================== 交互功能 ====================
+function giveReview() {
+  var card = document.getElementById('reviewCard');
+  card.classList.add('reviewed');
+  document.getElementById('reviewThanks').style.display = 'block';
+  showToast('感谢您的好评！❤️');
+}
+
+function shareResult() {
+  var score = document.getElementById('totalScore').textContent;
+  var life = document.getElementById('lifeTitle').textContent;
+  var text = '【AI全能颜值解析】\n综合评分：' + score + '分\n人生剧本：' + life;
+  if (navigator.share) {
+    navigator.share({ title: 'AI全能颜值解析', text: text, url: location.href }).catch(function(){});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { showToast('结果已复制到剪贴板'); }).catch(function() { showToast('复制失败'); });
+  } else {
+    showToast('当前浏览器不支持分享');
+  }
+}
+
+function showToast(msg) {
+  var toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2500);
+}
+
+function restart() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('uploadSection').style.display = 'block';
+  document.getElementById('previewSection').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('cameraInput').value = '';
+  uploadedImage = null;
+}
+
+// ==================== 初始化 ====================
+window.addEventListener('DOMContentLoaded', function() {
+  setupUpload();
+  loadModels();
+  var style = document.createElement('style');
+  style.textContent = '@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }';
+  document.head.appendChild(style);
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('pickBtn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('fileInput').click();});
+  document.getElementById('camBtn').addEventListener('click',function(e){e.stopPropagation();document.getElementById('cameraInput').click();});
+  document.getElementById('reviewBtn').addEventListener('click',giveReview);
+  document.getElementById('restartBtn').addEventListener('click',restart);
+  document.getElementById('shareBtn').addEventListener('click',shareResult);
+});
 </script>
 </body>
 </html>
